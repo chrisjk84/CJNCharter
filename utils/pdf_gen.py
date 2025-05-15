@@ -1,3 +1,7 @@
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from textwrap import wrap
+
 def generate_pdf(departure, destination, aircraft, output_path, scenario,
                  departure_metar, departure_taf, arrival_metar, arrival_taf):
     from reportlab.lib.pagesizes import letter
