@@ -1,7 +1,7 @@
 import requests
 import os
 
-AVWX_API_KEY = os.getenv("AVWX_API_KEY")
+AVWX_API_KEY = os.getenv('sBJsDPqYkpnIr2bQzt3wgYx91nDZ-sAHavot1axXIbQ')
 AVWX_BASE_URL = "https://avwx.rest/api"
 HEADERS = {"Authorization": AVWX_API_KEY}
 
