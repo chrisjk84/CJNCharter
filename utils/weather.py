@@ -5,7 +5,7 @@ AVWX_API_KEY = os.getenv("AVWX_API_KEY")
 AVWX_BASE_URL = "https://avwx.rest/api"
 
 HEADERS = {
-    "Authorization":sBJsDPqYkpnIr2bQzt3wgYx91nDZ-sAHavot1axXIbQ
+    "Authorization": 'sBJsDPqYkpnIr2bQzt3wgYx91nDZ-sAHavot1axXIbQ'
 }
 
 def get_metar(icao):
