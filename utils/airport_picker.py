@@ -30,7 +30,7 @@ def haversine(lat1, lon1, lat2, lon2):
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     return R * c
 
-def get_random_destination(airports, origin_icao, min_nm, max_nm):
+def get_random_destination(origin_icao, max_nm=None, min_nm=None):
     # Find origin airport
     origin = next((a for a in airports if a['ident'] == origin_icao), None)
     if not origin:

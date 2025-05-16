@@ -21,13 +21,25 @@ def index():
             # Collect form data
             icao = request.form['icao'].upper()
             aircraft = request.form['aircraft']
-            min_distance = int(request.form['min_distance'])
-            max_distance = int(request.form['max_distance'])
+
+            # Get min and max distance if provided, else None
+            min_distance_str = request.form.get('min_distance')
+            max_distance_str = request.form.get('max_distance')
+
+            min_distance = int(min_distance_str) if min_distance_str else None
+            max_distance = int(max_distance_str) if max_distance_str else None
 
             # Optional destination override
             destination_icao = request.form.get('destination', '').upper()
+
             if not destination_icao:
-                destination_icao = get_random_destination(icao, min_distance, max_distance)
+                # Call get_random_destination with optional distances
+                if max_distance is not None and min_distance is not None:
+                    destination_icao = get_random_destination(icao, max_nm=max_distance, min_nm=min_distance)
+                elif max_distance is not None:
+                    destination_icao = get_random_destination(icao, max_nm=max_distance)
+                else:
+                    destination_icao = get_random_destination(icao)
 
             print(f"Generating charter from {icao} to {destination_icao} using {aircraft}")
 
@@ -58,7 +70,6 @@ def index():
             return send_file(pdf_path, as_attachment=True)
 
         except Exception as e:
-            import traceback
             traceback.print_exc()
             return f"<h2>Error: {e}</h2><p>Check the logs for more details.</p>", 400
 
