@@ -1,7 +1,7 @@
 flask
+fpdf
 reportlab
 python-dotenv
 gunicorn
 openai>=1.0.0
 requests
-fpdf
