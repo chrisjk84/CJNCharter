@@ -31,7 +31,7 @@ def index():
 
             destination_icao = request.form.get('destination', '').upper()
             if not destination_icao:
-                destination_icao = get_random_destination(icao, airports, min_distance, max_distance)
+                destination_icao = get_random_destination(icao, airports, max_distance, min_distance)
                 if not destination_icao:
                     return "<h2>No eligible destination found with given parameters.</h2>", 400
 
