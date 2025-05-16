@@ -58,5 +58,8 @@ def index():
             return send_file(pdf_path, as_attachment=True)
 
         except Exception as e:
+            import traceback
             traceback.print_exc()
-            return f"<h2>Error: {e}</h2><
+            return f"<h2>Error: {e}</h2><p>Check the logs for more details.</p>", 400
+
+    return render_template('index.html')
