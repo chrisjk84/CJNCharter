@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, send_file
 from utils.pdf_gen import generate_pdf
 from utils.weather import get_weather_summary
 from utils.airport_info import load_runway_data, get_runway_summary
-from utils.scenario import generate_scenario
+from utils.scenario_gen import generate_scenario
 from utils.airport_picker import get_random_destination
 import os
 import traceback
