@@ -14,7 +14,7 @@ def load_runway_data(filepath="data/runways.csv"):
     with open(filepath, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            lights = light_map.get(row.get("edge_lights", "").strip(), "Unknown")
+            lights = light_map.get(row.get("lighted", "").strip(), "Unknown")
             data[row['airport_ident']].append({
                 "runway_ident": row.get("runway_ident"),
                 "length_ft": row.get("length_ft"),
