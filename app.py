@@ -5,37 +5,44 @@ from utils.airport_info import load_runway_data, get_runway_summary
 from utils.scenario import generate_scenario
 from utils.airport_picker import get_random_destination
 import os
+import traceback
 
 app = Flask(__name__)
 
-# Load runway data on startup
+# Load runway data once at startup
 runway_data = load_runway_data("data/runways.csv")
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
         try:
+            print("Form received:", request.form)
+
+            # Collect form data
             icao = request.form['icao'].upper()
             aircraft = request.form['aircraft']
             min_distance = int(request.form['min_distance'])
             max_distance = int(request.form['max_distance'])
 
-            # Optional destination field
+            # Optional destination override
             destination_icao = request.form.get('destination', '').upper()
-
             if not destination_icao:
-                # Pick random destination if not manually specified
                 destination_icao = get_random_destination(icao, min_distance, max_distance)
 
-            # Get weather and runway data
+            print(f"Generating charter from {icao} to {destination_icao} using {aircraft}")
+
+            # Get weather info
             departure_weather = get_weather_summary(icao)
             arrival_weather = get_weather_summary(destination_icao)
 
+            # Runway summaries
             departure_runways = get_runway_summary(icao, runway_data)
             arrival_runways = get_runway_summary(destination_icao, runway_data)
 
+            # Generate scenario narrative
             scenario = generate_scenario(icao, destination_icao, aircraft)
 
+            # Generate PDF
             pdf_path = generate_pdf(
                 icao,
                 destination_icao,
@@ -47,12 +54,9 @@ def index():
                 arrival_runways
             )
 
+            # Return generated PDF
             return send_file(pdf_path, as_attachment=True)
 
         except Exception as e:
-            return f"Error: {e}", 400
-
-    return render_template('index.html')
-
-if __name__ == '__main__':
-    app.run(debug=True)
+            traceback.print_exc()
+            return f"<h2>Error: {e}</h2><
