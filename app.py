@@ -4,13 +4,14 @@ from utils.weather import get_weather_summary
 from utils.airport_info import load_runway_data, get_runway_summary
 from utils.scenario import generate_scenario
 from utils.airport_picker import get_random_destination
-import os
+from utils.airport_data import load_airports
 import traceback
 
 app = Flask(__name__)
 
-# Load runway data once at startup
+# Load data once at startup
 runway_data = load_runway_data("data/runways.csv")
+airports = load_airports("data/airports.csv")
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -18,43 +19,32 @@ def index():
         try:
             print("Form received:", request.form)
 
-            # Collect form data
             icao = request.form['icao'].upper()
             aircraft = request.form['aircraft']
 
-            # Get min and max distance if provided, else None
-            min_distance_str = request.form.get('min_distance')
-            max_distance_str = request.form.get('max_distance')
+            # Optional min/max distances
+            min_distance = request.form.get('min_distance')
+            max_distance = request.form.get('max_distance')
 
-            min_distance = int(min_distance_str) if min_distance_str else None
-            max_distance = int(max_distance_str) if max_distance_str else None
+            min_distance = int(min_distance) if min_distance else None
+            max_distance = int(max_distance) if max_distance else None
 
-            # Optional destination override
             destination_icao = request.form.get('destination', '').upper()
-
             if not destination_icao:
-                # Call get_random_destination with optional distances
-                if max_distance is not None and min_distance is not None:
-                    destination_icao = get_random_destination(icao, max_nm=max_distance, min_nm=min_distance)
-                elif max_distance is not None:
-                    destination_icao = get_random_destination(icao, max_nm=max_distance)
-                else:
-                    destination_icao = get_random_destination(icao)
+                destination_icao = get_random_destination(icao, airports, max_distance, min_distance)
+                if not destination_icao:
+                    return "<h2>No eligible destination found with given parameters.</h2>", 400
 
             print(f"Generating charter from {icao} to {destination_icao} using {aircraft}")
 
-            # Get weather info
             departure_weather = get_weather_summary(icao)
             arrival_weather = get_weather_summary(destination_icao)
 
-            # Runway summaries
             departure_runways = get_runway_summary(icao, runway_data)
             arrival_runways = get_runway_summary(destination_icao, runway_data)
 
-            # Generate scenario narrative
             scenario = generate_scenario(icao, destination_icao, aircraft)
 
-            # Generate PDF
             pdf_path = generate_pdf(
                 icao,
                 destination_icao,
@@ -66,7 +56,6 @@ def index():
                 arrival_runways
             )
 
-            # Return generated PDF
             return send_file(pdf_path, as_attachment=True)
 
         except Exception as e:
