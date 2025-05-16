@@ -1,17 +1,24 @@
 import csv
+from collections import defaultdict
 
 def load_runway_data(filepath="data/runways.csv"):
-    runways = {}
-    with open(filepath, newline='', encoding='utf-8') as csvfile:
+    data = defaultdict(list)
+
+    light_map = {
+        'H': 'High Intensity',
+        'M': 'Medium Intensity',
+        'L': 'Low Intensity',
+        '': 'None'
+    }
+
+    with open(filepath, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            airport_ident = row['airport_ident']
-            if airport_ident not in runways:
-                runways[airport_ident] = []
-            runways[airport_ident].append({
-                "runway_ident": row["le_ident"],
-                "length_ft": row["length_ft"],
-                "surface": row["surface"],
-                "lights": row["edge_lights"]
+            lights = light_map.get(row.get("edge_lights", "").strip(), "Unknown")
+            data[row['airport_ident']].append({
+                "runway_ident": row.get("runway_ident"),
+                "length_ft": row.get("length_ft"),
+                "surface": row.get("surface"),
+                "lights": lights
             })
-    return runways
+    return data
