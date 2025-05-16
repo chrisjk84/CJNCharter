@@ -50,10 +50,13 @@ def index():
                 destination_icao,
                 aircraft,
                 scenario,
-                departure_weather,
-                arrival_weather,
-                departure_runways,
-                arrival_runways
+                arrival_taf=arrival_weather["taf"],
+                departure_metar_decoded=departure_weather["decoded_metar"],
+                arrival_metar_decoded=arrival_weather["decoded_metar"],
+                departure_runways=departure_runways,
+                arrival_runways=arrival_runways,
+                departure_summary=departure_weather["summary"],
+                arrival_summary=arrival_weather["summary"]
             )
 
             return send_file(pdf_path, as_attachment=True)
