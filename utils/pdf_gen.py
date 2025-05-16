@@ -40,4 +40,4 @@ def generate_pdf(
         f"Aircraft: {aircraft}\n"
         f"Departure: {departure_icao}\n"
         f"Arrival: {arrival_icao}\n"
-        f"Date: {datetime.utcnow().strftime('%Y-%m-%d %H:%MZ')}"
+        f"Date: {datetime.utcnow().strftime('%Y-%m-%d %H:%MZ')}")
