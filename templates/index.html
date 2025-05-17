@@ -1,27 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>CJN Charter Ops</title>
+    <title>Charter Flight Briefing</title>
 </head>
 <body>
-    <h1>CJN Charter Request</h1>
-    <form method="POST">
-        <label>Current ICAO:</label><br>
-        <input type="text" name="icao" required><br><br>
+    <h1>Charter Briefing Generator</h1>
+    <form method="post">
+        <label for="icao">Departure ICAO:</label>
+        <input type="text" name="icao" id="icao" required><br><br>
 
-        <label>Aircraft Type:</label><br>
-        <input type="text" name="aircraft" required><br><br>
+        <label for="aircraft">Aircraft Type:</label>
+        <input type="text" name="aircraft" id="aircraft" required><br><br>
 
-        <label for="min_distance">Minimum Distance (NM):</label><br>
-        <input type="number" name="min_distance" required><br><br>
+        <label for="min_distance">Minimum Distance (NM):</label>
+        <input type="number" name="min_distance" id="min_distance"><br><br>
 
-        <label for="max_distance">Maximum Distance (NM):</label><br>
-        <input type="number" name="max_distance" required><br><br>
+        <label for="max_distance">Maximum Distance (NM):</label>
+        <input type="number" name="max_distance" id="max_distance"><br><br>
 
-        <label>Destination ICAO (optional):</label><br>
-        <input type="text" name="destination"><br><br>
+        <label for="min_runway_length">Minimum Runway Length (ft):</label>
+        <input type="number" name="min_runway_length" id="min_runway_length" value="3000"><br><br>
 
-        <button type="submit">Generate Charter</button>
+        <label for="destination">Destination ICAO (optional):</label>
+        <input type="text" name="destination" id="destination"><br><br>
+
+        <button type="submit">Generate Brief</button>
     </form>
 </body>
 </html>
