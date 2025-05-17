@@ -50,8 +50,14 @@ def get_metar(icao_code):
         return f"Error fetching METAR: {e}"
 
 
-def get_weather_data_for_airports(airports):
-    for airport in airports:
-        icao = airport.get("ident")
-        airport["metar"] = get_metar(icao)
-    return airports
+def get_weather_data(icao_code):
+    url = f"https://aviationweather.gov/api/data/metar?ids={icao_code}&format=json"
+    try:
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()
+        data = response.json()
+        if data and isinstance(data, list) and len(data) > 0:
+            return data[0].get("raw_text", "No METAR available.")
+        return "No METAR found."
+    except Exception as e:
+        return f"Weather fetch error: {e}"
