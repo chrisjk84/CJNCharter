@@ -3,35 +3,51 @@ from geopy.distance import geodesic
 import requests
 
 def get_airports_within_range(origin_icao, min_distance_nm=0, max_distance_nm=300):
-    # Read all airports into memory as a list of dicts (row-wise)
+    # First, find the origin airport's coordinates
+    origin_lat = origin_lon = None
     with open("data/airports.csv", newline='', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
-        airports = list(reader)
-
-    # Find origin airport details
-    origin_row = next((row for row in airports if row['ident'] == origin_icao), None)
-    if not origin_row:
+        for row in reader:
+            if row['ident'] == origin_icao:
+                try:
+                    origin_lat = float(row['latitude_deg'])
+                    origin_lon = float(row['longitude_deg'])
+                except (TypeError, ValueError):
+                    return []
+                break
+    if origin_lat is None or origin_lon is None:
         return []
 
-    try:
-        origin_lat = float(origin_row['latitude_deg'])
-        origin_lon = float(origin_row['longitude_deg'])
-    except (TypeError, ValueError):
-        return []
-
+    # Now process airports line by line to find those within range
     results = []
-    for row in airports:
-        try:
-            lat = float(row['latitude_deg'])
-            lon = float(row['longitude_deg'])
-        except (TypeError, ValueError):
-            continue
-        distance_nm = geodesic((origin_lat, origin_lon), (lat, lon)).nautical
-        if min_distance_nm <= distance_nm <= max_distance_nm:
-            row_copy = dict(row)
-            row_copy['distance_nm'] = round(distance_nm, 1)
-            results.append(row_copy)
+    with open("data/airports.csv", newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            try:
+                lat = float(row['latitude_deg'])
+                lon = float(row['longitude_deg'])
+            except (TypeError, ValueError):
+                continue
+            distance_nm = geodesic((origin_lat, origin_lon), (lat, lon)).nautical
+            if min_distance_nm <= distance_nm <= max_distance_nm:
+                row_copy = dict(row)
+                row_copy['distance_nm'] = round(distance_nm, 1)
+                results.append(row_copy)
     return sorted(results, key=lambda x: x['distance_nm'])
+
+def get_runways_for_airport(icao_code, min_runway_length_ft=0):
+    runways = []
+    with open("data/runways.csv", newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            if row['ident'] == icao_code:
+                try:
+                    length = float(row['length_ft'])
+                except (TypeError, ValueError):
+                    continue
+                if length >= min_runway_length_ft:
+                    runways.append(dict(row))
+    return runways
 
 def get_weather_data(icao_code):
     """
@@ -66,17 +82,3 @@ def get_weather_data(icao_code):
             "error": str(e),
             "message": f"Could not fetch weather for {icao_code}"
         }
-
-def get_runways_for_airport(icao_code, min_runway_length_ft=0):
-    runways = []
-    with open("data/runways.csv", newline='', encoding='utf-8') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            if row['ident'] == icao_code:
-                try:
-                    length = float(row['length_ft'])
-                except (TypeError, ValueError):
-                    continue
-                if length >= min_runway_length_ft:
-                    runways.append(dict(row))
-    return runways
