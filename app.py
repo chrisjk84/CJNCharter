@@ -50,8 +50,6 @@ def index():
                 aircraft,
                 scenario,
                 arrival_taf=arrival_weather["taf"],
-                departure_metar_decoded=departure_weather["decoded_metar"],
-                arrival_metar_decoded=arrival_weather["decoded_metar"],
                 departure_runways=departure_runways,
                 arrival_runways=arrival_runways,
                 departure_summary=departure_weather["summary"],

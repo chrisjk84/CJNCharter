@@ -24,7 +24,6 @@ def get_weather_summary(icao):
 
         return {
             "taf": taf.get('raw', 'N/A'),
-            "decode_metar": metar.get('sanitized', 'N/A'),
             "summary": f"""Weather at {icao}:
 
 METAR:
@@ -37,6 +36,5 @@ TAF:
     except Exception as e:
         return {
             "taf": "N/A",
-            "decoded_metar": "N/A",
             "summary": f"Weather data unavailable for {icao} due to error: {str(e)}"
         }
