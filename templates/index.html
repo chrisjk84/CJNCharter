@@ -1,18 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Charter Generator</title>
+    <meta charset="UTF-8">
+    <title>Charter Flight Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            background: #f7f9fc;
+        }
+        h1 {
+            font-size: 32px;
+            color: #333;
+        }
+        form {
+            background: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 500px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        input[type=submit] {
+            background: #007BFF;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        input[type=submit]:hover {
+            background: #0056b3;
+        }
+    </style>
 </head>
 <body>
-    <h1>Charter Flight Generator</h1>
+    <h1>Generate a Charter Briefing</h1>
     <form method="POST">
-        ICAO (Departure): <input type="text" name="icao" required><br>
-        Aircraft Type: <input type="text" name="aircraft" required><br>
-        Min Distance (NM): <input type="number" name="min_distance"><br>
-        Max Distance (NM): <input type="number" name="max_distance"><br>
-        Min Runway Length (ft): <input type="number" name="min_runway_length"><br>
-        Destination (optional): <input type="text" name="destination"><br><br>
-        <input type="submit" value="Generate Charter">
+        <label>Departure ICAO:</label>
+        <input type="text" name="icao" required>
+
+        <label>Aircraft Type:</label>
+        <input type="text" name="aircraft" required>
+
+        <label>Minimum Distance (NM):</label>
+        <input type="number" name="min_distance">
+
+        <label>Maximum Distance (NM):</label>
+        <input type="number" name="max_distance">
+
+        <label>Minimum Runway Length (ft):</label>
+        <input type="number" name="min_runway_length">
+
+        <label>Destination ICAO (optional):</label>
+        <input type="text" name="destination">
+
+        <input type="submit" value="Generate Briefing">
     </form>
 </body>
 </html>

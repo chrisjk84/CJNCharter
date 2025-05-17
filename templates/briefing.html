@@ -1,32 +1,72 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Charter Briefing</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        h1, h2 { color: #003366; }
-        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            padding: 40px;
+            line-height: 1.6;
+            background: #f2f4f7;
+            color: #333;
+        }
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 900px;
+            margin: auto;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #004085;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            overflow-x: auto;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
     </style>
 </head>
 <body>
-    <h1>Charter Briefing</h1>
-    <h2>Overview</h2>
-    <p><strong>Aircraft:</strong> {{ aircraft }}</p>
-    <p><strong>From:</strong> {{ departure_icao }} &nbsp; <strong>To:</strong> {{ destination_icao }}</p>
+    <div class="container">
+        <h1>Charter Briefing</h1>
 
-    <h2>Scenario</h2>
-    <pre>{{ scenario }}</pre>
+        <div class="section">
+            <h2>Overview</h2>
+            <p><strong>Aircraft:</strong> {{ aircraft }}</p>
+            <p><strong>Departure:</strong> {{ departure }}</p>
+            <p><strong>Arrival:</strong> {{ arrival }}</p>
+        </div>
 
-    <h2>Departure Weather</h2>
-    <pre>{{ departure_weather["summary"] }}</pre>
+        <div class="section">
+            <h2>Generated Scenario</h2>
+            <pre>{{ scenario }}</pre>
+        </div>
 
-    <h2>Arrival Weather</h2>
-    <pre>{{ arrival_weather["summary"] }}</pre>
+        <div class="section">
+            <h2>Departure Weather</h2>
+            <pre>{{ departure_weather }}</pre>
+        </div>
 
-    <h2>Departure Runways</h2>
-    <pre>{{ departure_runways }}</pre>
+        <div class="section">
+            <h2>Arrival Weather</h2>
+            <pre>{{ arrival_weather }}</pre>
+        </div>
 
-    <h2>Arrival Runways</h2>
-    <pre>{{ arrival_runways }}</pre>
+        <div class="section">
+            <h2>Runways</h2>
+            <p><strong>Departure Runways:</strong></p>
+            <pre>{{ departure_runways }}</pre>
+
+            <p><strong>Arrival Runways:</strong></p>
+            <pre>{{ arrival_runways }}</pre>
+        </div>
+    </div>
 </body>
 </html>

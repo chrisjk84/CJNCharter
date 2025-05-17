@@ -1,64 +1,110 @@
-from flask import Flask, render_template, request, send_file
-from utils.pdf_gen import generate_pdf
-from utils.weather import get_weather_summary
-from utils.airport_info import load_runway_data, get_runway_summary, filter_airports_by_runway_length
-from utils.scenario import generate_scenario
-from utils.airport_picker import get_random_destination
-from utils.airport_data import load_airports
-import traceback
+import os
+import random
+from flask import Flask, request, render_template
+from math import radians, cos, sin, asin, sqrt
+import csv
+import openai
+from weather import get_weather_data, get_runways
 
 app = Flask(__name__)
 
-# Load data
-runway_data = load_runway_data("data/runways.csv")
-all_airports = load_airports("data/airports.csv")
+# Load API key
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
-@app.route('/', methods=['GET', 'POST'])
+# Load airport data
+def load_airports():
+    with open("airports.csv", newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        return list(reader)
+
+airports = load_airports()
+
+# Haversine distance (in nautical miles)
+def haversine(lat1, lon1, lat2, lon2):
+    R = 3440.1  # nautical miles
+    lat1, lon1, lat2, lon2 = map(radians, [float(lat1), float(lon1), float(lat2), float(lon2)])
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+    c = 2 * asin(sqrt(a))
+    return R * c
+
+# Get a valid destination airport
+def get_random_destination(origin_icao, airports, max_nm=None, min_nm=None, min_runway_length=None):
+    origin = next((a for a in airports if a['ident'] == origin_icao), None)
+    if not origin:
+        return None
+
+    lat1 = float(origin['latitude_deg'])
+    lon1 = float(origin['longitude_deg'])
+
+    eligible = []
+    for airport in airports:
+        if airport['ident'] == origin_icao:
+            continue
+        if airport['type'] not in ['large_airport', 'medium_airport']:
+            continue
+        if min_runway_length and airport.get('longest_runway') and int(airport['longest_runway']) < min_runway_length:
+            continue
+
+        lat2 = float(airport['latitude_deg'])
+        lon2 = float(airport['longitude_deg'])
+        dist = haversine(lat1, lon1, lat2, lon2)
+
+        if (min_nm is None or dist >= min_nm) and (max_nm is None or dist <= max_nm):
+            eligible.append(airport)
+
+    return random.choice(eligible)['ident'] if eligible else None
+
+# Generate a scenario using OpenAI
+def generate_scenario(departure, arrival, aircraft):
+    prompt = f"Generate a realistic charter flight mission scenario for a {aircraft} from {departure} to {arrival}."
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    return response.choices[0].message.content.strip()
+
+@app.route("/", methods=["GET", "POST"])
 def index():
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
-            print("Form received:", request.form)
-
-            icao = request.form['icao'].upper()
-            aircraft = request.form['aircraft']
-            min_distance = int(request.form.get('min_distance') or 0)
-            max_distance = int(request.form.get('max_distance') or 1000)
-            min_runway_length = int(request.form.get('min_runway_length') or 0)
-
-            destination_icao = request.form.get('destination', '').upper()
-            eligible_airports = filter_airports_by_runway_length(all_airports, runway_data, min_runway_length)
+            icao = request.form["icao"].upper()
+            aircraft = request.form["aircraft"]
+            min_distance = request.form.get("min_distance", type=int)
+            max_distance = request.form.get("max_distance", type=int)
+            min_runway_length = request.form.get("min_runway_length", type=int)
+            destination_icao = request.form.get("destination", "").upper()
 
             if not destination_icao:
-                destination_icao = get_random_destination(icao, eligible_airports, max_distance, min_distance)
+                destination_icao = get_random_destination(
+                    icao, airports, max_distance, min_distance, min_runway_length
+                )
                 if not destination_icao:
                     return "<h2>No eligible destination found with given parameters.</h2>", 400
 
-            print(f"Generating charter from {icao} to {destination_icao} using {aircraft}")
-
-            departure_weather = get_weather_summary(icao)
-            arrival_weather = get_weather_summary(destination_icao)
-
-            departure_runways = get_runway_summary(icao, runway_data)
-            arrival_runways = get_runway_summary(destination_icao, runway_data)
-
             scenario = generate_scenario(icao, destination_icao, aircraft)
+            departure_weather = get_weather_data(icao)
+            arrival_weather = get_weather_data(destination_icao)
 
-            pdf_path = generate_pdf(
-                departure_icao=icao,
-                arrival_icao=destination_icao,
+            departure_runways = get_runways(icao)
+            arrival_runways = get_runways(destination_icao)
+
+            return render_template(
+                "briefing.html",
                 aircraft=aircraft,
+                departure=icao,
+                arrival=destination_icao,
                 scenario=scenario,
-                arrival_taf=arrival_weather["taf"],
+                departure_weather=departure_weather["summary"],
+                arrival_weather=arrival_weather["summary"],
                 departure_runways=departure_runways,
-                arrival_runways=arrival_runways,
-                departure_summary=departure_weather["summary"],
-                arrival_summary=arrival_weather["summary"]
+                arrival_runways=arrival_runways
             )
-
-            return send_file(pdf_path, as_attachment=True, download_name="charter.pdf", mimetype="application/pdf")
-
         except Exception as e:
-            traceback.print_exc()
-            return f"<h2>Error: {e}</h2><p>Check the logs for more details.</p>", 400
+            return f"<h2>Error occurred: {e}</h2>", 500
 
-    return render_template('index.html')
+    return render_template("index.html")
+
+if __name__ == "__main__":
+    app.run(debug=True)
