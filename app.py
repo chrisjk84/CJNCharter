@@ -15,13 +15,24 @@ def index():
         aircraft = request.form.get("aircraft")
         min_distance = int(request.form.get("min_distance", 0))
         max_distance = int(request.form.get("max_distance", 1000))
+        min_runway_length = int(request.form.get("min_runway_length", 0))
 
-        # Get list of viable destination airports
+        # Get all airports within distance range
         destinations = get_airports_within_range(
-            departure_icao, min_distance, max_distance, min_runway_length
+            departure_icao, min_distance, max_distance
         )
+
+        # Filter for runways that meet minimum length requirement
+        destinations = [
+            d for d in destinations
+            if any(
+                r['length_ft'] >= min_runway_length
+                for r in get_runways_for_airport(d['ident'], min_runway_length)
+            )
+        ]
+
         if not destinations:
-            return render_template("index.html", error="No valid destinations found.")
+            return render_template("briefing.html", error="No valid destinations found.")
 
         # Pick the first destination for now
         arrival_icao = destinations[0]["ident"]
@@ -48,4 +59,5 @@ def index():
             arrival_runways=arrival_runways,
         )
 
-    return render_template("index.html")
+    # GET request fallback – empty form or landing state
+    return render_template("briefing.html")

@@ -14,31 +14,34 @@
 <body>
     <h1>CJN Charter Flight Dispatch</h1>
 
-    <form method="post">
-        <label for="icao">Departure ICAO:</label><br />
-        <input type="text" id="icao" name="icao" value="{{ departure_icao or '' }}" required /><br />
+   <form method="post">
+    <label for="icao">Departure ICAO:</label><br />
+    <input type="text" id="icao" name="icao" value="{{ departure_icao or '' }}" required /><br />
 
-        <label for="aircraft">Aircraft Type:</label><br />
-        <input type="text" id="aircraft" name="aircraft" value="{{ aircraft or '' }}" required /><br />
+    <label for="aircraft">Aircraft Type:</label><br />
+    <input type="text" id="aircraft" name="aircraft" value="{{ aircraft or '' }}" required /><br />
 
-        <label for="min_distance">Min Distance (km):</label><br />
-        <input type="number" id="min_distance" name="min_distance" value="{{ min_distance or 0 }}" min="0" /><br />
+    <label for="min_distance">Min Distance (NM):</label><br />
+    <input type="number" id="min_distance" name="min_distance" value="{{ min_distance or 0 }}" min="0" /><br />
 
-        <label for="max_distance">Max Distance (km):</label><br />
-        <input type="number" id="max_distance" name="max_distance" value="{{ max_distance or 1000 }}" min="0" /><br />
+    <label for="max_distance">Max Distance (NM):</label><br />
+    <input type="number" id="max_distance" name="max_distance" value="{{ max_distance or 1000 }}" min="0" /><br />
 
-        <label for="destination">Destination ICAO (optional):</label><br />
-        <select id="destination" name="destination">
-            <option value="">-- Select destination --</option>
-            {% for airport in nearby_airports %}
-                <option value="{{ airport.ident }}" {% if arrival_icao == airport.ident %}selected{% endif %}>
-                    {{ airport.ident }} - {{ airport.name }} ({{ airport.distance_km }} km)
-                </option>
-            {% endfor %}
-        </select><br />
+    <label for="min_runway_length">Minimum Runway Length (ft):</label><br />
+    <input type="number" id="min_runway_length" name="min_runway_length" value="{{ min_runway_length or 0 }}" min="0" /><br />
 
-        <button type="submit">Generate Briefing</button>
-    </form>
+    <label for="destination">Destination ICAO (optional):</label><br />
+    <select id="destination" name="destination">
+        <option value="">-- Select destination --</option>
+        {% for airport in nearby_airports %}
+            <option value="{{ airport.ident }}" {% if arrival_icao == airport.ident %}selected{% endif %}>
+                {{ airport.ident }} - {{ airport.name }} ({{ airport.distance_nm }} NM)
+            </option>
+        {% endfor %}
+    </select><br />
+
+    <button type="submit">Generate Briefing</button>
+</form>
 
     {% if error %}
         <p class="error">{{ error }}</p>
