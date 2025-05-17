@@ -1,7 +1,7 @@
 import requests
 import os
 
-AVWX_API_KEY = os.getenv('sBJsDPqYkpnIr2bQzt3wgYx91nDZ-sAHavot1axXIbQ')
+AVWX_API_KEY = os.getenv('AVWX_API_KEY')
 
 def fetch_metar(icao):
     url = f"https://avwx.rest/api/metar/{icao}"
@@ -26,7 +26,6 @@ def get_weather_summary(icao):
             "taf": taf.get('raw', 'N/A'),
             "decode_metar": metar.get('sanitized', 'N/A')
             "summary": f"""Weather at {icao}:
-
 
 METAR:
 {metar.get('raw', 'N/A')}
