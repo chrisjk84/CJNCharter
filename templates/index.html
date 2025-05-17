@@ -219,6 +219,24 @@
             margin-bottom: 1.7rem;
             letter-spacing: 0.05em;
         }
+        .cjx-changelog-link {
+            display: inline-block;
+            margin-top: 0.5em;
+            color: var(--cjx-white);
+            font-size: 1.1rem;
+            background: var(--cjx-accent);
+            padding: 0.4em 1.2em;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.16s;
+        }
+        .cjx-changelog-link:hover,
+        .cjx-changelog-link:focus {
+            background: var(--cjx-blue);
+            color: var(--cjx-white);
+            text-decoration: underline;
+        }
         @media (max-width: 700px) {
             .cjx-header {
                 flex-direction: column;
@@ -254,11 +272,23 @@
             <img src="{{ url_for('static', filename='CJX-Aviation-Network-logo.png') }}" alt="CJX Aviation Network Logo" class="cjx-logo-img">
             <span class="cjx-tagline">Pilot Dispatch Portal &mdash; Homebase: New Orleans, Worldwide Service</span>
         </div>
-        <div class="cjx-version">V0.2.3b</div>
+        <div class="cjx-version">V0.2.4b</div>
     </div>
     <div class="cjx-content">
         <div class="cjx-section-title">Flight Request Form</div>
-        <form method="POST">
+        <form method="POST" id="dispatch-form">
+            <label for="aircraft_select">Select Aircraft:</label>
+            <select id="aircraft_select" class="cjx-input">
+                <option value="">-- Select Aircraft --</option>
+                {% for a in aircraft_list %}
+                  <option value="{{ a.name }}"
+                          data-max_passengers="{{ a.max_passengers }}"
+                          data-min_landing_distance="{{ a.min_landing_distance }}"
+                          data-max_range="{{ a.max_range }}">
+                    {{ a.name }}
+                  </option>
+                {% endfor %}
+            </select>
             <div class="cjx-row">
                 <div>
                     <label>Departure ICAO:</label>
@@ -282,6 +312,10 @@
                 <div>
                     <label>Max Passengers:</label>
                     <input type="number" name="max_passengers" value="{{ user_input.max_passengers }}" min="1" max="50" required class="cjx-input">
+                </div>
+                <div>
+                    <label>Max Range (nm):</label>
+                    <input type="number" name="max_range" value="{{ user_input.max_range if user_input.max_range is defined else '' }}" min="1" class="cjx-input" readonly>
                 </div>
             </div>
             <div class="cjx-checkbox-group">
@@ -338,6 +372,35 @@
     </div>
     <div class="cjx-footer">
         &copy; 2025 Chris Keever 2025
+        <br>
+        <a href="{{ url_for('changelog') }}" class="cjx-changelog-link">View Change Log</a>
     </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const aircraftSelect = document.getElementById('aircraft_select');
+        const maxPassengersInput = document.querySelector('input[name="max_passengers"]');
+        const minRunwayInput = document.querySelector('input[name="min_runway_length"]');
+        const maxRangeInput = document.querySelector('input[name="max_range"]');
+        const maxDistInput = document.querySelector('input[name="max_distance"]');
+
+        aircraftSelect.addEventListener('change', function() {
+            const selected = aircraftSelect.selectedOptions[0];
+            if(selected && selected.value !== "") {
+                maxPassengersInput.value = selected.dataset.max_passengers;
+                minRunwayInput.value = selected.dataset.min_landing_distance;
+                maxRangeInput.value = selected.dataset.max_range;
+                if (maxDistInput) {
+                    maxDistInput.max = selected.dataset.max_range;
+                    if (parseInt(maxDistInput.value) > parseInt(selected.dataset.max_range)) {
+                        maxDistInput.value = selected.dataset.max_range;
+                    }
+                }
+            } else {
+                maxRangeInput.value = "";
+                maxDistInput.max = "";
+            }
+        });
+    });
+    </script>
 </body>
 </html>

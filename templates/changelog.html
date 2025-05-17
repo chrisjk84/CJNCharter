@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>CJX Aviation Network - Change Log</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        :root {
+            --cjx-black: #141414;
+            --cjx-darkgray: #23272a;
+            --cjx-lightgray: #e0e0e0;
+            --cjx-white: #ffffff;
+            --cjx-accent: #6c757d;
+            --cjx-blue: #4682b4;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: var(--cjx-black);
+            color: var(--cjx-lightgray);
+            font-family: 'Segoe UI', 'Arial', 'Helvetica Neue', sans-serif;
+        }
+        .cjx-header {
+            background: var(--cjx-darkgray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 2rem 1rem 2rem;
+            border-bottom: 2px solid var(--cjx-accent);
+        }
+        .cjx-header-center {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .cjx-logo-img {
+            height: 56px;
+            display: block;
+            margin: 0 auto 0.6rem auto;
+        }
+        .cjx-tagline {
+            font-size: 1.2rem;
+            color: var(--cjx-lightgray);
+            font-style: italic;
+            opacity: 0.8;
+        }
+        .cjx-content {
+            max-width: 650px;
+            margin: 2rem auto;
+            background: var(--cjx-darkgray);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.32);
+            padding: 2.5rem 2rem;
+        }
+        .cjx-section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            color: var(--cjx-white);
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+        .changelog-list {
+            list-style: disc;
+            margin: 1.8em 2em 1.2em 2em;
+            color: var(--cjx-lightgray);
+            font-size: 1.13rem;
+        }
+        .changelog-date {
+            color: var(--cjx-accent);
+            font-size: 1rem;
+            font-weight: bold;
+            margin-top: 1.5em;
+        }
+        .cjx-footer {
+            text-align: center;
+            color: var(--cjx-lightgray);
+            opacity: 0.85;
+            font-size: 1.05rem;
+            margin-top: 2.3rem;
+            margin-bottom: 1.7rem;
+            letter-spacing: 0.05em;
+        }
+        .cjx-changelog-link {
+            display: inline-block;
+            margin-top: 0.5em;
+            color: var(--cjx-white);
+            font-size: 1.1rem;
+            background: var(--cjx-accent);
+            padding: 0.4em 1.2em;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.16s;
+        }
+        .cjx-changelog-link:hover,
+        .cjx-changelog-link:focus {
+            background: var(--cjx-blue);
+            color: var(--cjx-white);
+            text-decoration: underline;
+        }
+        @media (max-width: 700px) {
+            .cjx-header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 1.2rem 0.7rem 0.8rem 0.7rem;
+            }
+            .cjx-content {
+                padding: 1.1rem 0.8rem;
+            }
+            .cjx-logo-img {
+                height: 44px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cjx-header">
+        <div class="cjx-header-center">
+            <img src="{{ url_for('static', filename='CJX-Aviation-Network-logo.png') }}" alt="CJX Aviation Network Logo" class="cjx-logo-img">
+            <span class="cjx-tagline">Pilot Dispatch Portal &mdash; Homebase: New Orleans, Worldwide Service</span>
+        </div>
+    </div>
+    <div class="cjx-content">
+        <div class="cjx-section-title">Change Log</div>
+        <div class="changelog-date">2025-05-17</div>
+        <ul class="changelog-list">
+            <li>Added aircraft selector with auto-fill.</li>
+            <li>Maximum dispatch distance now limited by aircraft range.</li>
+            <li>Change log page added.</li>
+        </ul>
+        <div class="changelog-date">2025-05-10</div>
+        <ul class="changelog-list">
+            <li>SimBrief dispatch button moved above dispatch info.</li>
+            <li>Logo and tagline centered in header.</li>
+        </ul>
+        <div class="changelog-date">2025-05-01</div>
+        <ul class="changelog-list">
+            <li>Initial dispatch portal launch.</li>
+        </ul>
+        <div style="text-align:center;">
+            <a href="{{ url_for('index') }}" class="cjx-changelog-link">Back to Dispatch Portal</a>
+        </div>
+    </div>
+    <div class="cjx-footer">
+        &copy; 2025 Chris Keever 2025
+    </div>
+</body>
+</html>

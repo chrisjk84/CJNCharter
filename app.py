@@ -10,6 +10,7 @@ app = Flask(__name__)
 
 AIRPORTS_CSV = os.path.join("data", "airports.csv")
 RUNWAYS_CSV = os.path.join("data", "runways.csv")
+AIRCRAFT_CSV = "aircraft.csv"  # Aircraft CSV at project root
 
 client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 AVWX_API_KEY = os.getenv("AVWX_API_KEY")
@@ -22,6 +23,23 @@ def haversine(lat1, lon1, lat2, lon2):
     dlambda = math.radians(float(lon2) - float(lon1))
     a = math.sin(dphi/2)**2 + math.cos(phi1)*math.cos(phi2)*math.sin(dlambda/2)**2
     return R * (2 * math.atan2(math.sqrt(a), math.sqrt(1-a)))
+
+def load_aircraft():
+    aircraft = []
+    if os.path.exists(AIRCRAFT_CSV):
+        try:
+            with open(AIRCRAFT_CSV, newline='') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    aircraft.append({
+                        'name': row['name'],
+                        'max_passengers': int(row['max_passengers']),
+                        'min_landing_distance': int(row['min_landing_distance']),
+                        'max_range': int(row['max_range'])
+                    })
+        except Exception as e:
+            print(f"Error loading aircraft.csv: {e}")
+    return aircraft
 
 def load_airports():
     with open(AIRPORTS_CSV, newline='', encoding='utf-8') as f:
@@ -178,13 +196,16 @@ def index():
     weather_brief_dest = None
     airport_info = None
     results = []
+    aircraft_list = load_aircraft()
     user_input = {
         "departure_icao": "",
         "min_distance": "50",
         "max_distance": "500",
         "min_runway_length": "2000",
         "surface": ["turf", "asph", "grvl", "concrete", "dirt"],
-        "max_passengers": "6"
+        "max_passengers": "6",
+        "max_range": "",
+        "aircraft_selected": ""
     }
     if request.method == 'POST':
         try:
@@ -194,14 +215,29 @@ def index():
             min_rwy_len = int(request.form['min_runway_length'])
             surfaces = [s.lower() for s in request.form.getlist('surface')]
             max_pax = int(request.form['max_passengers'])
+            max_range = request.form.get('max_range', '').strip()
+            aircraft_selected = request.form.get('aircraft_selected', '').strip()
             user_input.update({
                 "departure_icao": dep_icao,
                 "min_distance": str(min_dist),
                 "max_distance": str(max_dist),
                 "min_runway_length": str(min_rwy_len),
                 "surface": surfaces,
-                "max_passengers": str(max_pax)
+                "max_passengers": str(max_pax),
+                "max_range": max_range,
+                "aircraft_selected": aircraft_selected
             })
+            # Restrict max_distance by aircraft max_range if selected
+            if max_range:
+                try:
+                    max_range_val = int(max_range)
+                    if max_dist > max_range_val:
+                        error = f"Selected aircraft range is {max_range_val} nm. Max distance cannot exceed this."
+                        max_dist = max_range_val
+                        user_input["max_distance"] = str(max_range_val)
+                except Exception:
+                    error = "Invalid aircraft max range."
+
             if not dep_icao:
                 error = "Departure ICAO is required."
             elif not surfaces:
@@ -259,8 +295,13 @@ def index():
         random_scenario=random_scenario,
         weather_brief_dep=weather_brief_dep,
         weather_brief_dest=weather_brief_dest,
-        airport_info=airport_info
+        airport_info=airport_info,
+        aircraft_list=aircraft_list
     )
+
+@app.route('/changelog')
+def changelog():
+    return render_template('changelog.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
