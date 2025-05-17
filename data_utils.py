@@ -46,29 +46,40 @@ def get_runways_for_airport(icao_code, min_runway_length_ft=0):
     return runways
 
 def get_weather_data(icao_code):
-    # Unchanged from previous version
+    """
+    Fetch METAR weather data from AVWX API.
+    """
+    api_key = os.environ.get("AVWX_API_KEY")
+    if not api_key:
+        return {"error": "AVWX_API_KEY not set in environment"}
+
+    url = f"https://avwx.rest/api/metar/{icao_code}"
+    headers = {
+        "Authorization": api_key,
+        "Accept": "application/json",
+    }
+
     try:
-        url = f"https://aviationweather.gov/api/data/metar?ids={icao_code}&format=json"
-        response = requests.get(url, timeout=5)
+        response = requests.get(url, headers=headers, timeout=5)
         response.raise_for_status()
         data = response.json()
-        if not data:
-            return {"message": f"No METAR data found for {icao_code}"}
-        metar = data[0]
+
+        # AVWX returns a lot; here’s a simple mapping that you can customize:
         return {
-            "raw": metar.get("raw_text", ""),
-            "station": metar.get("station_id", icao_code),
-            "observation_time": metar.get("observation_time", ""),
-            "temperature_c": metar.get("temp_c", None),
-            "dewpoint_c": metar.get("dewpoint_c", None),
-            "wind_direction": metar.get("wind_dir_degrees", None),
-            "wind_speed_kt": metar.get("wind_speed_kt", None),
-            "visibility_statute_mi": metar.get("visibility_statute_mi", None),
-            "altim_in_hg": metar.get("altim_in_hg", None),
-            "flight_category": metar.get("flight_category", None),
+            "raw": data.get("raw", ""),
+            "station": data.get("station", icao_code),
+            "observation_time": data.get("time", {}).get("dt", ""),
+            "temperature_c": data.get("temperature", {}).get("value", None),
+            "dewpoint_c": data.get("dewpoint", {}).get("value", None),
+            "wind_direction": data.get("wind_direction", {}).get("value", None),
+            "wind_speed_kt": data.get("wind_speed", {}).get("value", None),
+            "visibility_statute_mi": data.get("visibility", {}).get("repr", None),
+            "altim_in_hg": data.get("altimeter", {}).get("value", None),
+            "flight_category": data.get("flight_rules", None),
         }
+
     except Exception as e:
         return {
             "error": str(e),
-            "message": f"Could not fetch weather for {icao_code}"
+            "message": f"Could not fetch weather for {icao_code} from AVWX"
         }
