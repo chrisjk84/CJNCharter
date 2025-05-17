@@ -2,99 +2,54 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Charter Flight Briefing</title>
+    <title>CJX Aviation Network Dispatch v.1b</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 2em auto;
-            max-width: 800px;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f5f7fa;
-        }
-        h1, h2, h3 {
-            color: #004080;
-            margin-bottom: 0.5em;
-        }
-        form input, form button {
-            font-size: 1.1em;
-            padding: 0.5em;
-            margin: 0.3em 0 1em 0;
-            width: 100%;
-            max-width: 320px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #004080;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background-color 0.3s ease;
-        }
-        button:hover {
-            background-color: #003366;
-        }
-        .section {
-            margin-top: 2em;
-            padding: 1.5em;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            background-color: white;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
-        .scenario {
-            white-space: pre-wrap;
-            font-size: 1.18em;
-            font-weight: 500;
-            color: #222;
-            margin-top: 0.5em;
-        }
-        ul {
-            padding-left: 1.2em;
-        }
-        label {
-            font-weight: 600;
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        label { font-weight: bold; }
+        input, select { margin: 5px 0 15px; width: 200px; padding: 5px; }
+        .scenario { font-size: 1.2em; margin-top: 20px; background: #f0f0f0; padding: 15px; border-radius: 8px; }
+        .error { color: red; font-weight: bold; }
     </style>
 </head>
 <body>
-    <h1>Charter Flight Briefing Generator</h1>
+    <h1>CJN Charter Flight Dispatch</h1>
 
-    <form method="POST" action="/">
-        <label for="icao">ICAO Code:</label><br />
-        <input type="text" id="icao" name="icao" required placeholder="e.g. KJAX" /><br />
+    <form method="post">
+        <label for="icao">Departure ICAO:</label><br />
+        <input type="text" id="icao" name="icao" value="{{ departure_icao or '' }}" required /><br />
 
-        <label for="aircraft">Aircraft:</label><br />
-        <input type="text" id="aircraft" name="aircraft" required placeholder="e.g. CJ3" /><br />
+        <label for="aircraft">Aircraft Type:</label><br />
+        <input type="text" id="aircraft" name="aircraft" value="{{ aircraft or '' }}" required /><br />
 
-        <label for="min_runway_length">Min Runway Length (feet):</label><br />
-        <input type="number" id="min_runway_length" name="min_runway_length" value="{{ min_runway_length or 3000 }}" min="0" /><br />
+        <label for="min_distance">Min Distance (km):</label><br />
+        <input type="number" id="min_distance" name="min_distance" value="{{ min_distance or 0 }}" min="0" /><br />
+
+        <label for="max_distance">Max Distance (km):</label><br />
+        <input type="number" id="max_distance" name="max_distance" value="{{ max_distance or 1000 }}" min="0" /><br />
+
+        <label for="destination">Destination ICAO (optional):</label><br />
+        <select id="destination" name="destination">
+            <option value="">-- Select destination --</option>
+            {% for airport in nearby_airports %}
+                <option value="{{ airport.ident }}" {% if arrival_icao == airport.ident %}selected{% endif %}>
+                    {{ airport.ident }} - {{ airport.name }} ({{ airport.distance_km }} km)
+                </option>
+            {% endfor %}
+        </select><br />
 
         <button type="submit">Generate Briefing</button>
     </form>
 
-    {% if icao %}
-    <div class="section">
-        <h2>Briefing for Flight from {{ icao }}</h2>
-        <h3>Aircraft: {{ aircraft }}</h3>
-
-        <h3>Weather Summary</h3>
-        <p>{{ weather_summary }}</p>
-
-        <h3>Runways (min length: {{ min_runway_length }} ft)</h3>
-        <ul>
-            {% for runway in runways %}
-                <li>{{ runway }}</li>
-            {% endfor %}
-        </ul>
-
-        <h3>Flight Scenario</h3>
-        <p class="scenario">{{ scenario }}</p>
-    </div>
+    {% if error %}
+        <p class="error">{{ error }}</p>
     {% endif %}
+
+    {% if scenario %}
+        <div class="scenario">
+            <h2>Flight Scenario</h2>
+            <p>{{ scenario }}</p>
+        </div>
+    {% endif %}
+
 </body>
 </html>

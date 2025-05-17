@@ -1,45 +1,69 @@
 from flask import Flask, render_template, request
-from data_utils import get_weather_data, get_runways
-import openai
+from data_utils import get_airport_info, get_weather_data, get_runways, get_nearby_airports
+from openai_utils import generate_scenario
 
 app = Flask(__name__)
-
-openai.api_key = "YOUR_OPENAI_API_KEY"
-
-def generate_scenario(icao, aircraft):
-    prompt = f"Generate a professional flight briefing scenario for a flight departing {icao} with aircraft {aircraft}."
-    try:
-        response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=prompt,
-            max_tokens=300,
-            temperature=0.7
-        )
-        return response.choices[0].text.strip()
-    except Exception as e:
-        return f"Error generating scenario: {e}"
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
-        icao = request.form.get("icao", "").upper()
+        departure_icao = request.form.get("icao", "").upper()
         aircraft = request.form.get("aircraft", "")
-        min_length = int(request.form.get("min_runway_length", 3000))
+        min_distance = float(request.form.get("min_distance", 0))
+        max_distance = float(request.form.get("max_distance", 1000))
+        destination = request.form.get("destination", "").upper()
 
-        weather_data = get_weather_data(icao)
-        runways = get_runways(icao, min_length)
-        scenario = generate_scenario(icao, aircraft)
+        print(f"Form received: departure={departure_icao}, aircraft={aircraft}, min_dist={min_distance}, max_dist={max_distance}, destination={destination}")
+
+        # Get departure airport info
+        departure_info = get_airport_info(departure_icao)
+        if not departure_info:
+            error = f"Departure airport {departure_icao} not found."
+            return render_template("briefing.html", error=error)
+
+        # Get nearby airports filtered by min/max distance
+        nearby_airports = get_nearby_airports(departure_info['latitude'], departure_info['longitude'], min_distance, max_distance)
+
+        # If destination not specified, pick first from filtered nearby airports
+        if not destination:
+            if nearby_airports:
+                destination = nearby_airports[0]['ident']
+            else:
+                error = "No nearby airports found within specified distance range."
+                return render_template("briefing.html", error=error)
+
+        # Get arrival airport info
+        arrival_info = get_airport_info(destination)
+        if not arrival_info:
+            error = f"Arrival airport {destination} not found."
+            return render_template("briefing.html", error=error)
+
+        # Get weather and runways
+        departure_weather = get_weather_data(departure_icao)
+        arrival_weather = get_weather_data(destination)
+        departure_runways = get_runways(departure_icao)
+        arrival_runways = get_runways(destination)
+
+        # Generate scenario text using OpenAI
+        scenario_text = generate_scenario(departure_icao, destination, aircraft)
 
         return render_template(
             "briefing.html",
-            icao=icao,
             aircraft=aircraft,
-            weather_summary=weather_data["summary"],
-            runways=runways,
-            scenario=scenario,
-            min_runway_length=min_length
+            departure_icao=departure_icao,
+            arrival_icao=destination,
+            min_distance=min_distance,
+            max_distance=max_distance,
+            nearby_airports=nearby_airports,
+            departure_weather=departure_weather,
+            arrival_weather=arrival_weather,
+            departure_runways=departure_runways,
+            arrival_runways=arrival_runways,
+            scenario=scenario_text
         )
-    return render_template("briefing.html")
+
+    # GET request
+    return render_template("briefing.html", nearby_airports=[])
 
 if __name__ == "__main__":
     app.run(debug=True)
