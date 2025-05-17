@@ -1,6 +1,9 @@
+import os
 import csv
 import math
-import os
+import random
+import requests
+import openai
 from flask import Flask, render_template, request
 
 app = Flask(__name__)
@@ -8,6 +11,11 @@ app = Flask(__name__)
 AIRPORTS_CSV = os.path.join("data", "airports.csv")
 RUNWAYS_CSV = os.path.join("data", "runways.csv")
 
+# Set your OpenAI API key from environment variable
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+# AVWX API Key from environment
+AVWX_API_KEY = os.getenv("AVWX_API_KEY")
 
 def haversine(lat1, lon1, lat2, lon2):
     # Calculate great-circle distance between two points (in NM)
@@ -19,20 +27,18 @@ def haversine(lat1, lon1, lat2, lon2):
     a = math.sin(dphi/2)**2 + math.cos(phi1)*math.cos(phi2)*math.sin(dlambda/2)**2
     return R * (2 * math.atan2(math.sqrt(a), math.sqrt(1-a)))
 
-
 def load_airports():
     with open(AIRPORTS_CSV, newline='', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         return [row for row in reader]
-
 
 def load_runways():
     with open(RUNWAYS_CSV, newline='', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         return [row for row in reader]
 
-
 def get_airport_by_icao(airports, icao):
+    icao = icao.upper()
     for a in airports:
         if ((a.get("icao_code") and a["icao_code"].upper() == icao) or
             (a.get("gps_code") and a["gps_code"].upper() == icao) or
@@ -40,10 +46,8 @@ def get_airport_by_icao(airports, icao):
             return a
     return None
 
-
 def runways_for_airport_id(runways, airport_id):
     return [r for r in runways if r["airport_ref"] == airport_id]
-
 
 def find_destinations(dep_icao, min_dist, max_dist, min_rwy_len, surfaces, max_pax):
     airports = load_airports()
@@ -60,7 +64,6 @@ def find_destinations(dep_icao, min_dist, max_dist, min_rwy_len, surfaces, max_p
     for rwy in runways:
         rwys_by_airport.setdefault(rwy["airport_ref"], []).append(rwy)
 
-    # Filter airports
     results = []
     for airport in airports:
         # Skip departure airport itself
@@ -92,7 +95,6 @@ def find_destinations(dep_icao, min_dist, max_dist, min_rwy_len, surfaces, max_p
         if not (min_dist <= dist <= max_dist):
             continue
 
-        # Output ICAO, Name, Location (Municipality, State/Region)
         icao_out = airport.get("icao_code") or airport.get("gps_code") or airport.get("iata_code") or ""
         results.append({
             "icao": icao_out,
@@ -101,11 +103,69 @@ def find_destinations(dep_icao, min_dist, max_dist, min_rwy_len, surfaces, max_p
         })
     return results
 
+def fetch_avwx_metar(icao):
+    """Fetch METAR from AVWX for a given ICAO code."""
+    key = AVWX_API_KEY
+    if not key or not icao:
+        return "No API key or ICAO code."
+    url = f"https://avwx.rest/api/metar/{icao}"
+    headers = {
+        "Authorization": key,
+        "Accept": "application/json"
+    }
+    try:
+        resp = requests.get(url, headers=headers, timeout=10)
+        if resp.ok:
+            data = resp.json()
+            return data.get("raw", "No METAR found.")
+        return "No METAR available."
+    except Exception as e:
+        return f"AVWX METAR error: {e}"
+
+def fetch_avwx_taf(icao):
+    """Fetch TAF from AVWX for a given ICAO code."""
+    key = AVWX_API_KEY
+    if not key or not icao:
+        return ""
+    url = f"https://avwx.rest/api/taf/{icao}"
+    headers = {
+        "Authorization": key,
+        "Accept": "application/json"
+    }
+    try:
+        resp = requests.get(url, headers=headers, timeout=10)
+        if resp.ok:
+            data = resp.json()
+            return data.get("raw", "")
+        return ""
+    except Exception:
+        return ""
+
+def generate_openai_scenario(dep, dest, distance_nm, metar, taf, pax):
+    prompt = (
+        f"You are the pilot of a virtual charter flight from {dep['name']} ({dep['icao']}) to "
+        f"{dest['name']} ({dest['icao']}). The distance is {int(distance_nm)} nautical miles. "
+        f"Current METAR at the destination: {metar}. TAF: {taf}. You have {pax} passengers. "
+        "Generate a short, immersive, and realistic scenario for this flight, including a reason for the trip, passenger details, and any interesting complications or decisions."
+    )
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=200,
+            temperature=0.8,
+        )
+        return response.choices[0].message['content'].strip()
+    except Exception as e:
+        return f"OpenAI error: {e}"
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     results = []
     error = ""
+    random_scenario = None
+    weather_brief = None
+    airport_info = None
     user_input = {
         "departure_icao": "",
         "min_distance": "50",
@@ -138,10 +198,55 @@ def index():
                 results = find_destinations(dep_icao, min_dist, max_dist, min_rwy_len, surfaces, max_pax)
                 if not results:
                     error = "No results found with the current filters."
+                elif 'random_flight' in request.form:
+                    dep_airport = get_airport_by_icao(load_airports(), dep_icao)
+                    dest = random.choice(results)
+                    # Lookup full destination info
+                    airports = load_airports()
+                    dest_full = None
+                    for a in airports:
+                        if a.get("icao_code") == dest["icao"] or a.get("gps_code") == dest["icao"]:
+                            dest_full = a
+                            break
+                    distance = haversine(
+                        float(dep_airport["latitude_deg"]), float(dep_airport["longitude_deg"]),
+                        float(dest_full["latitude_deg"]), float(dest_full["longitude_deg"])
+                    )
+                    metar = fetch_avwx_metar(dest_full["icao_code"])
+                    taf = fetch_avwx_taf(dest_full["icao_code"])
+                    weather_brief = f"METAR: {metar}\nTAF: {taf}"
+                    scenario = generate_openai_scenario(dep_airport, dest_full, distance, metar, taf, max_pax)
+                    random_scenario = scenario
+                    airport_info = {
+                        "icao": dest_full["icao_code"],
+                        "name": dest_full["name"],
+                        "location": f"{dest_full.get('municipality','')}, {dest_full.get('iso_region','')}",
+                        "elevation": dest_full.get("elevation_ft", ""),
+                        "runway": "See below"
+                    }
+                    # Find a suitable runway at destination
+                    runways = load_runways()
+                    rwylist = [r for r in runways if r["airport_ref"] == dest_full["id"] and
+                               int(r["length_ft"] or 0) >= min_rwy_len and
+                               any(s in (r["surface"] or "").lower() for s in surfaces)]
+                    if rwylist:
+                        best_rwy = sorted(rwylist, key=lambda x: -int(x["length_ft"] or 0))[0]
+                        airport_info["runway"] = (
+                            f"{best_rwy['ident']}: {best_rwy['length_ft']} ft, {best_rwy['surface']}"
+                        )
+                    else:
+                        airport_info["runway"] = "No suitable runway found."
         except Exception as e:
             error = f"Error: {e}"
-    return render_template('index.html', results=results, error=error, user_input=user_input)
-
+    return render_template(
+        'index.html',
+        results=results,
+        error=error,
+        user_input=user_input,
+        random_scenario=random_scenario,
+        weather_brief=weather_brief,
+        airport_info=airport_info
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)

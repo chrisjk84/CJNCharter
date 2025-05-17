@@ -39,6 +39,7 @@
             <input type="number" name="max_passengers" value="{{ user_input.max_passengers }}" min="1" max="50" required>
         </div>
         <button type="submit">Find Destinations</button>
+        <button type="submit" name="random_flight" value="1">Generate Random Charter</button>
     </form>
 
     {% if error %}
@@ -61,6 +62,15 @@
                 </tr>
             {% endfor %}
         </table>
+    {% endif %}
+
+    {% if random_scenario %}
+        <h2>Random Charter Scenario</h2>
+        <b>Destination:</b> {{ airport_info.icao }} - {{ airport_info.name }} ({{ airport_info.location }})<br>
+        <b>Elevation:</b> {{ airport_info.elevation }} ft<br>
+        <b>Runway:</b> {{ airport_info.runway }}<br>
+        <b>Weather Brief:</b><pre>{{ weather_brief }}</pre>
+        <b>Scenario:</b> <pre>{{ random_scenario }}</pre>
     {% endif %}
 </body>
 </html>
