@@ -57,6 +57,7 @@ def index():
             )
             
             print("PDF path or object:", pdf_path, type(pdf_path))
+            return "<h2>PDF generate failed. Check server logs for details. </h2>", 500
             return send_file(pdf_path, as_attachment=True, download_name="charter.pdf", mimetype="application/pdf")
 
         except Exception as e:
