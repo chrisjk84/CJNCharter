@@ -1,35 +1,33 @@
 import pandas as pd
 from geopy.distance import geodesic
 import requests
-
-# Load your CSV data once when module loads
-airports_df = pd.read_csv("data/airports.csv")
-runways_df = pd.read_csv("data/runways.csv")
-
-# Ensure runway lengths are numeric (in case of bad or missing data)
-runways_df['length_ft'] = pd.to_numeric(runways_df['length_ft'], errors='coerce')
+import gc
 
 def get_airports_within_range(origin_icao, min_distance_nm=0, max_distance_nm=300):
-    # Find origin airport lat/lon
-    origin_row = airports_df[airports_df['ident'] == origin_icao]
-    if origin_row.empty:
-        return []  # Origin ICAO not found
-    
-    origin_lat = float(origin_row.iloc[0]['latitude_deg'])
-    origin_lon = float(origin_row.iloc[0]['longitude_deg'])
+    airports_df = pd.read_csv("data/airports.csv")
+    try:
+        origin_row = airports_df[airports_df['ident'] == origin_icao]
+        if origin_row.empty:
+            return []  # Origin ICAO not found
 
-    airports = []
+        origin_lat = float(origin_row.iloc[0]['latitude_deg'])
+        origin_lon = float(origin_row.iloc[0]['longitude_deg'])
 
-    for _, row in airports_df.iterrows():
-        lat, lon = float(row['latitude_deg']), float(row['longitude_deg'])
-        distance_nm = geodesic((origin_lat, origin_lon), (lat, lon)).nautical
+        airports = []
 
-        if min_distance_nm <= distance_nm <= max_distance_nm:
-            airport = row.to_dict()
-            airport['distance_nm'] = round(distance_nm, 1)
-            airports.append(airport)
+        for _, row in airports_df.iterrows():
+            lat, lon = float(row['latitude_deg']), float(row['longitude_deg'])
+            distance_nm = geodesic((origin_lat, origin_lon), (lat, lon)).nautical
 
-    return sorted(airports, key=lambda x: x['distance_nm'])
+            if min_distance_nm <= distance_nm <= max_distance_nm:
+                airport = row.to_dict()
+                airport['distance_nm'] = round(distance_nm, 1)
+                airports.append(airport)
+
+        return sorted(airports, key=lambda x: x['distance_nm'])
+    finally:
+        del airports_df
+        gc.collect()
 
 def get_weather_data(icao_code):
     """
@@ -66,16 +64,19 @@ def get_weather_data(icao_code):
         }
 
 def get_runways_for_airport(icao_code, min_runway_length_ft=0):
-    """
-    Get runways for an airport filtered by minimum runway length in feet.
-    """
-    airport_runways = runways_df[runways_df['ident'] == icao_code]
-    if airport_runways.empty:
-        return []
-    
-    filtered_runways = airport_runways[airport_runways['length_ft'] >= min_runway_length_ft]
+    runways_df = pd.read_csv("data/runways.csv")
+    runways_df['length_ft'] = pd.to_numeric(runways_df['length_ft'], errors='coerce')
+    try:
+        airport_runways = runways_df[runways_df['ident'] == icao_code]
+        if airport_runways.empty:
+            return []
 
-    # Convert to list of dicts for easier templating
-    runways_list = filtered_runways.to_dict(orient='records')
+        filtered_runways = airport_runways[airport_runways['length_ft'] >= min_runway_length_ft]
 
-    return runways_list
+        # Convert to list of dicts for easier templating
+        runways_list = filtered_runways.to_dict(orient='records')
+
+        return runways_list
+    finally:
+        del runways_df
+        gc.collect()
