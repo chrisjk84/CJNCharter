@@ -3,8 +3,8 @@ from geopy.distance import geodesic
 import requests
 
 # Load your CSV data once when module loads
-airports_df = pd.read_csv("/data/airports.csv")
-runways_df = pd.read_csv("/data/runways.csv")
+airports_df = pd.read_csv("data/airports.csv")
+runways_df = pd.read_csv("data/runways.csv")
 
 # Ensure runway lengths are numeric (in case of bad or missing data)
 runways_df['length_ft'] = pd.to_numeric(runways_df['length_ft'], errors='coerce')
