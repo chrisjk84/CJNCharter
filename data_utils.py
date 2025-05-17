@@ -1,69 +1,57 @@
-import csv
-import math
-import requests
+import pandas as pd
 import os
+import requests
+from geopy.distance import geodesic
+from xml.etree import ElementTree as ET
 
-AIRPORTS_CSV = "data/airports.csv"  # Path to your CSV file with airport data
+# Paths to CSVs
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+AIRPORTS_FILE = os.path.join(BASE_DIR, "data", "airports.csv")
+RUNWAYS_FILE = os.path.join(BASE_DIR, "data", "runways.csv")
 
-def haversine(lat1, lon1, lat2, lon2):
-    R = 6371  # km
-    dlat = math.radians(lat2 - lat1)
-    dlon = math.radians(lon2 - lon1)
-    a = (math.sin(dlat / 2) ** 2 + math.cos(math.radians(lat1))
-         * math.cos(math.radians(lat2)) * math.sin(dlon / 2) ** 2)
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    return R * c
+# Load CSVs
+airports_df = pd.read_csv(AIRPORTS_FILE)
+runways_df = pd.read_csv(RUNWAYS_FILE)
 
-def get_airport_info(icao_code):
-    with open(AIRPORTS_CSV, newline='', encoding='utf-8') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            if row['ident'].upper() == icao_code.upper():
-                return {
-                    'ident': row['ident'],
-                    'name': row['name'],
-                    'latitude': float(row['latitude_deg']),
-                    'longitude': float(row['longitude_deg']),
-                    'elevation': row.get('elevation_ft', ''),
-                }
-    return None
+def get_airports_within_range(origin_lat, origin_lon, min_distance_nm=0, max_distance_nm=300):
+    airports = []
 
-def get_nearby_airports(lat, lon, min_dist_km=0, max_dist_km=1000):
-    nearby = []
-    with open(AIRPORTS_CSV, newline='', encoding='utf-8') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            if row['type'] not in ['small_airport', 'medium_airport', 'large_airport']:
-                # skip helipads, closed airports, etc.
-                continue
-            try:
-                air_lat = float(row['latitude_deg'])
-                air_lon = float(row['longitude_deg'])
-            except (ValueError, KeyError):
-                continue
-            dist = haversine(lat, lon, air_lat, air_lon)
-            if min_dist_km <= dist <= max_dist_km:
-                nearby.append({
-                    'ident': row['ident'],
-                    'name': row['name'],
-                    'distance_km': round(dist, 1)
-                })
-    nearby.sort(key=lambda x: x['distance_km'])
-    return nearby
+    for _, row in airports_df.iterrows():
+        lat, lon = row['latitude_deg'], row['longitude_deg']
+        distance_nm = geodesic((origin_lat, origin_lon), (lat, lon)).nautical
 
-def get_weather_data(icao_code):
-    # Placeholder for weather data fetching
-    # Return dict with keys like 'metar', 'taf', etc.
-    # Implement as needed or use your existing code.
-    return {
-        'metar': f"METAR data for {icao_code}",
-        'taf': f"TAF data for {icao_code}"
-    }
+        if min_distance_nm <= distance_nm <= max_distance_nm:
+            airport = row.to_dict()
+            airport['distance_nm'] = round(distance_nm, 1)
+            airports.append(airport)
 
-def get_runways(icao_code):
-    # Placeholder for runway info fetching
-    # Return list of runways with lengths and surface types
-    return [
-        {'id': '09/27', 'length_ft': 5000, 'surface': 'asphalt'},
-        {'id': '18/36', 'length_ft': 3000, 'surface': 'grass'},
-    ]
+    return sorted(airports, key=lambda x: x['distance_nm'])
+
+
+def get_runways_for_airport(ident, min_runway_length_ft=3000):
+    runways = runways_df[runways_df['airport_ident'] == ident]
+    filtered = runways[runways['length_ft'] >= min_runway_length_ft]
+    return filtered.to_dict(orient='records')
+
+
+def get_metar(icao_code):
+    url = f"https://aviationweather.gov/adds/dataserver_current/httpparam?" \
+          f"dataSource=metars&requestType=retrieve&format=xml&stationString={icao_code}&hoursBeforeNow=1"
+
+    try:
+        response = requests.get(url, timeout=5)
+        if response.status_code == 200:
+            root = ET.fromstring(response.content)
+            metar = root.find(".//raw_text")
+            return metar.text if metar is not None else "No METAR found"
+        else:
+            return f"Failed to fetch METAR: HTTP {response.status_code}"
+    except Exception as e:
+        return f"Error fetching METAR: {e}"
+
+
+def get_weather_data_for_airports(airports):
+    for airport in airports:
+        icao = airport.get("ident")
+        airport["metar"] = get_metar(icao)
+    return airports
