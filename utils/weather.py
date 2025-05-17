@@ -24,7 +24,7 @@ def get_weather_summary(icao):
 
         return {
             "taf": taf.get('raw', 'N/A'),
-            "decode_metar": metar.get('sanitized', 'N/A')
+            "decode_metar": metar.get('sanitized', 'N/A'),
             "summary": f"""Weather at {icao}:
 
 METAR:
