@@ -1,0 +1,33 @@
+ICAO Code,Make,Model,Max Passengers,Min Landing Distance (ft),Max Range (nm)
+CL60,Bombardier,Challenger 600,19,2400,3800
+C25B,Cessna,Citation CJ3,9,2770,2040
+C25C,Cessna,Citation CJ4,10,2940,2165
+TBM9,Daher,TBM 940,6,2430,1730
+C700,Cessna,Citation Longitude,12,3400,3500
+E190,Embraer,E190,114,4081,2450
+A320,Airbus,A320,180,4593,3300
+A320N,Airbus,A320neo,194,4593,3500
+A319,Airbus,A319ceo,156,4757,3700
+A339,Airbus,A330-900,287,6070,7200
+B350,Beechcraft,King Air 350,11,3300,1800
+B38M,Boeing,737 MAX 8,210,4921,3550
+B407,Bell,407,6,1525,330
+B60T,Beechcraft,Duke B60 Turbine,6,2500,1400
+B703,Boeing,707-320,189,5000,5750
+B720,Boeing,720B,156,5000,3200
+B736,Boeing,737-600,132,4300,3050
+B738,Boeing,737-800,189,4300,3060
+C414,Cessna,Chancellor,8,2500,1528
+C46,Curtiss,Commando,50,3000,1500
+CRJ7,Bombardier,CRJ-700,78,5040,1550
+D17S,Beechcraft,Staggerwing D17S,5,1500,670
+DC3,Douglas,DC-3,32,2000,1500
+DC6,Douglas,DC-6,102,3500,4584
+EC35,Airbus,H135 (EC135),7,1500,342
+K100,Dassault,Falcon 100,8,3000,2000
+MD11,McDonnell Douglas,MD-11,293,7000,7240
+MD88,McDonnell Douglas,MD-88,155,5000,2050
+MU-2,Mitsubishi,MU-2B,8,2000,1450
+P180,Piaggio,Avanti II,9,3000,1470
+PC12,Pilatus,PC-12 NGX,9,2485,1803
+RJ70,British Aerospace,Avro RJ70,82,4000,1700

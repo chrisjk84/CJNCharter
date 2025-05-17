@@ -179,7 +179,9 @@ def fetch_fpdb_route(origin_icao, dest_icao):
             if data and isinstance(data, list) and "route" in data[0]:
                 return data[0]["route"] or "No route string found"
             else:
-                return "No route found in FlightPlanDatabase."
+                return "No routing available in FlightPlanDatabase for this city pair. Please file your own route as direct (DCT) or try another airport."
+        elif resp.status_code == 404:
+            return "No routing available in FlightPlanDatabase for this city pair. Please file your own route as direct (DCT) or try another airport."
         else:
             return f"FlightPlanDatabase error: HTTP {resp.status_code}"
     except Exception as e:
