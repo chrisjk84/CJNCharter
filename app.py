@@ -17,27 +17,28 @@ def index():
         max_distance = int(request.form.get("max_distance", 1000))
         min_runway_length = int(request.form.get("min_runway_length", 0))
 
-        # Get all airports within distance range
+        # Get all airports within range
         destinations = get_airports_within_range(
             departure_icao, min_distance, max_distance
         )
 
-        # Filter for runways that meet minimum length requirement
-        destinations = [
-            d for d in destinations
-            if any(
-                r['length_ft'] >= min_runway_length
-                for r in get_runways_for_airport(d['ident'], min_runway_length)
-            )
-        ]
-
         if not destinations:
-            return render_template("briefing.html", error="No valid destinations found.")
+            return render_template("briefing.html", error="No nearby airports found.")
 
-        # Pick the first destination for now
-        arrival_icao = destinations[0]["ident"]
+        # Select a destination (first one for now)
+        selected = None
+        for airport in destinations:
+            runways = get_runways_for_airport(airport['ident'], min_runway_length)
+            if runways:  # Ensure at least one suitable runway exists
+                selected = airport
+                break
 
-        # Get scenario text
+        if not selected:
+            return render_template("briefing.html", error="No destinations with valid runways found.")
+
+        arrival_icao = selected["ident"]
+
+        # Get scenario
         scenario = generate_scenario(departure_icao, arrival_icao, aircraft)
 
         # Get weather and runways
@@ -59,5 +60,5 @@ def index():
             arrival_runways=arrival_runways,
         )
 
-    # GET request fallback – empty form or landing state
+    # GET request fallback – show empty form
     return render_template("briefing.html")
