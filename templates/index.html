@@ -1,65 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Charter Flight Generator</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Charter Flight Briefing</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            padding: 40px;
-            background: #f7f9fc;
-        }
-        h1 {
-            font-size: 32px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 2em auto;
+            max-width: 800px;
+            line-height: 1.6;
             color: #333;
         }
-        form {
-            background: #fff;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            max-width: 500px;
+        h1, h2, h3 {
+            color: #004080;
         }
-        input {
+        form input, form button {
+            font-size: 1.1em;
+            padding: 0.5em;
+            margin: 0.3em 0;
             width: 100%;
-            padding: 10px;
-            margin: 10px 0 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            max-width: 300px;
+            box-sizing: border-box;
         }
-        input[type=submit] {
-            background: #007BFF;
-            color: #fff;
+        button {
+            background-color: #004080;
+            color: white;
             border: none;
             cursor: pointer;
         }
-        input[type=submit]:hover {
-            background: #0056b3;
+        button:hover {
+            background-color: #003366;
+        }
+        .section {
+            margin-top: 2em;
+            padding: 1em;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background-color: #f9f9f9;
+        }
+        .scenario {
+            white-space: pre-wrap;
+            font-size: 1.15em;
+            font-weight: 500;
+            color: #222;
+        }
+        ul {
+            padding-left: 1.2em;
         }
     </style>
 </head>
 <body>
-    <h1>Generate a Charter Briefing</h1>
-    <form method="POST">
-        <label>Departure ICAO:</label>
-        <input type="text" name="icao" required>
+    <h1>Charter Flight Briefing Generator</h1>
 
-        <label>Aircraft Type:</label>
-        <input type="text" name="aircraft" required>
+    <form method="POST" action="/">
+        <label for="icao">ICAO Code:</label><br />
+        <input type="text" id="icao" name="icao" required placeholder="e.g. KJAX" /><br />
 
-        <label>Minimum Distance (NM):</label>
-        <input type="number" name="min_distance">
+        <label for="aircraft">Aircraft:</label><br />
+        <input type="text" id="aircraft" name="aircraft" required placeholder="e.g. CJ3" /><br />
 
-        <label>Maximum Distance (NM):</label>
-        <input type="number" name="max_distance">
+        <label for="min_runway_length">Min Runway Length (feet):</label><br />
+        <input type="number" id="min_runway_length" name="min_runway_length" value="{{ min_runway_length or 3000 }}" min="0" /><br />
 
-        <label>Minimum Runway Length (ft):</label>
-        <input type="number" name="min_runway_length">
-
-        <label>Destination ICAO (optional):</label>
-        <input type="text" name="destination">
-
-        <input type="submit" value="Generate Briefing">
+        <button type="submit">Generate Briefing</button>
     </form>
+
+    {% if icao %}
+    <div class="section">
+        <h2>Briefing for Flight from {{ icao }}</h2>
+        <h3>Aircraft: {{ aircraft }}</h3>
+
+        <h3>Weather Summary</h3>
+        <p>{{ weather_summary }}</p>
+
+        <h3>Runways (min length: {{ min_runway_length }} ft)</h3>
+        <ul>
+            {% for runway in runways %}
+                <li>{{ runway }}</li>
+            {% endfor %}
+        </ul>
+
+        <h3>Flight Scenario</h3>
+        <p class="scenario">{{ scenario }}</p>
+    </div>
+    {% endif %}
 </body>
 </html>

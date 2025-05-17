@@ -1,72 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Charter Briefing</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Charter Flight Briefing</title>
     <style>
         body {
-            font-family: 'Segoe UI', sans-serif;
-            padding: 40px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 2em auto;
+            max-width: 800px;
             line-height: 1.6;
-            background: #f2f4f7;
             color: #333;
+            background-color: #f5f7fa;
         }
-        .container {
-            background: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            max-width: 900px;
-            margin: auto;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        h1, h2, h3 {
+            color: #004080;
+            margin-bottom: 0.5em;
         }
-        h1, h2 {
-            color: #004085;
+        form input, form button {
+            font-size: 1.1em;
+            padding: 0.5em;
+            margin: 0.3em 0 1em 0;
+            width: 100%;
+            max-width: 320px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
-        pre {
-            background: #f8f9fa;
-            padding: 15px;
-            border-left: 4px solid #007bff;
-            overflow-x: auto;
+        button {
+            background-color: #004080;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #003366;
         }
         .section {
-            margin-bottom: 30px;
+            margin-top: 2em;
+            padding: 1.5em;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background-color: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .scenario {
+            white-space: pre-wrap;
+            font-size: 1.18em;
+            font-weight: 500;
+            color: #222;
+            margin-top: 0.5em;
+        }
+        ul {
+            padding-left: 1.2em;
+        }
+        label {
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Charter Briefing</h1>
+    <h1>Charter Flight Briefing Generator</h1>
 
-        <div class="section">
-            <h2>Overview</h2>
-            <p><strong>Aircraft:</strong> {{ aircraft }}</p>
-            <p><strong>Departure:</strong> {{ departure }}</p>
-            <p><strong>Arrival:</strong> {{ arrival }}</p>
-        </div>
+    <form method="POST" action="/">
+        <label for="icao">ICAO Code:</label><br />
+        <input type="text" id="icao" name="icao" required placeholder="e.g. KJAX" /><br />
 
-        <div class="section">
-            <h2>Generated Scenario</h2>
-            <pre>{{ scenario }}</pre>
-        </div>
+        <label for="aircraft">Aircraft:</label><br />
+        <input type="text" id="aircraft" name="aircraft" required placeholder="e.g. CJ3" /><br />
 
-        <div class="section">
-            <h2>Departure Weather</h2>
-            <pre>{{ departure_weather }}</pre>
-        </div>
+        <label for="min_runway_length">Min Runway Length (feet):</label><br />
+        <input type="number" id="min_runway_length" name="min_runway_length" value="{{ min_runway_length or 3000 }}" min="0" /><br />
 
-        <div class="section">
-            <h2>Arrival Weather</h2>
-            <pre>{{ arrival_weather }}</pre>
-        </div>
+        <button type="submit">Generate Briefing</button>
+    </form>
 
-        <div class="section">
-            <h2>Runways</h2>
-            <p><strong>Departure Runways:</strong></p>
-            <pre>{{ departure_runways }}</pre>
+    {% if icao %}
+    <div class="section">
+        <h2>Briefing for Flight from {{ icao }}</h2>
+        <h3>Aircraft: {{ aircraft }}</h3>
 
-            <p><strong>Arrival Runways:</strong></p>
-            <pre>{{ arrival_runways }}</pre>
-        </div>
+        <h3>Weather Summary</h3>
+        <p>{{ weather_summary }}</p>
+
+        <h3>Runways (min length: {{ min_runway_length }} ft)</h3>
+        <ul>
+            {% for runway in runways %}
+                <li>{{ runway }}</li>
+            {% endfor %}
+        </ul>
+
+        <h3>Flight Scenario</h3>
+        <p class="scenario">{{ scenario }}</p>
     </div>
+    {% endif %}
 </body>
 </html>
