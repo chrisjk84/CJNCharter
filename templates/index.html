@@ -60,7 +60,7 @@
             pointer-events: none;
         }
         .cjx-content {
-            max-width: 600px;
+            max-width: 650px;
             margin: 2rem auto;
             background: var(--cjx-darkgray);
             border-radius: 12px;
@@ -177,11 +177,12 @@
         .cjx-info-block b {
             color: var(--cjx-lightgray);
         }
-        .cjx-weather, .cjx-scenario {
+        .cjx-weather, .cjx-scenario, .cjx-route-block {
             margin-top: 1.2rem;
         }
         .cjx-weather pre,
-        .cjx-scenario pre {
+        .cjx-scenario pre,
+        .cjx-route-block pre {
             background: var(--cjx-darkgray);
             color: var(--cjx-white);
             border-radius: 6px;
@@ -189,6 +190,15 @@
             font-family: 'Fira Mono', 'Consolas', monospace;
             font-size: 1.05rem;
             white-space: pre-wrap;
+        }
+        .cjx-footer {
+            text-align: center;
+            color: var(--cjx-lightgray);
+            opacity: 0.85;
+            font-size: 1.05rem;
+            margin-top: 2.3rem;
+            margin-bottom: 1.7rem;
+            letter-spacing: 0.05em;
         }
         @media (max-width: 700px) {
             .cjx-header {
@@ -288,12 +298,21 @@
                     <b>Weather Briefing (Destination):</b>
                     <pre>{{ weather_brief_dest }}</pre>
                 </div>
+                {% if route_string and "No route" not in route_string %}
+                <div class="cjx-route-block">
+                    <b>Proposed Routing (FlightPlanDatabase):</b>
+                    <pre>{{ route_string }}</pre>
+                </div>
+                {% endif %}
                 <div class="cjx-scenario">
                     <b>Flight Scenario:</b>
                     <pre>{{ random_scenario }}</pre>
                 </div>
             </div>
         {% endif %}
+    </div>
+    <div class="cjx-footer">
+        &copy; 2025 Chris Keever 2025
     </div>
 </body>
 </html>
