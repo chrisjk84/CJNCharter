@@ -25,7 +25,7 @@ def get_random_destination(origin_icao, airports, max_nm=None, min_nm=None):
             
     eligible = []
     for airport in airports:
-        if airport['ident'].upper() == orgin_icao.upper():
+        if airport['ident'].upper() == origin_icao.upper():
             continue
         try:
             lat2 = float(airport['latitude_deg'])
