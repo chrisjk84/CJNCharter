@@ -69,7 +69,7 @@ def get_runways_for_airport(icao_code, min_runway_length_ft=0):
     """
     Get runways for an airport filtered by minimum runway length in feet.
     """
-    airport_runways = runways_df[runways_df['airport_ident'] == icao_code]
+    airport_runways = runways_df[runways_df['ident'] == icao_code]
     if airport_runways.empty:
         return []
     
