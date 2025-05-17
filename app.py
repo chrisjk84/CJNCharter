@@ -170,30 +170,12 @@ def generate_openai_scenario(dep, dest, distance_nm, dep_metar, dest_metar, dest
     except Exception as e:
         return f"OpenAI error: {e}"
 
-def fetch_fpdb_route(origin_icao, dest_icao):
-    url = f"https://api.flightplandatabase.com/nav/route/{origin_icao}/{dest_icao}"
-    try:
-        resp = requests.get(url, timeout=10)
-        if resp.ok:
-            data = resp.json()
-            if data and isinstance(data, list) and "route" in data[0]:
-                return data[0]["route"] or "No route string found"
-            else:
-                return "No routing available in FlightPlanDatabase for this city pair. Please file your own route as direct (DCT) or try another airport."
-        elif resp.status_code == 404:
-            return "No routing available in FlightPlanDatabase for this city pair. Please file your own route as direct (DCT) or try another airport."
-        else:
-            return f"FlightPlanDatabase error: HTTP {resp.status_code}"
-    except Exception as e:
-        return f"FlightPlanDatabase fetch error: {e}"
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
     error = ""
     random_scenario = None
     weather_brief_dep = None
     weather_brief_dest = None
-    route_string = None
     airport_info = None
     results = []
     user_input = {
@@ -248,7 +230,6 @@ def index():
                     dest_taf = fetch_avwx_taf(dest_full["icao"])
                     weather_brief_dep = dep_metar
                     weather_brief_dest = f"METAR: {dest_metar}\nTAF: {dest_taf}"
-                    route_string = fetch_fpdb_route(dep_airport["icao"], dest_full["icao"])
                     scenario = generate_openai_scenario(dep_airport, dest_full, distance, dep_metar, dest_metar, dest_taf, max_pax)
                     random_scenario = scenario
                     airport_info = {
@@ -278,8 +259,7 @@ def index():
         random_scenario=random_scenario,
         weather_brief_dep=weather_brief_dep,
         weather_brief_dest=weather_brief_dest,
-        airport_info=airport_info,
-        route_string=route_string
+        airport_info=airport_info
     )
 
 if __name__ == '__main__':

@@ -177,12 +177,11 @@
         .cjx-info-block b {
             color: var(--cjx-lightgray);
         }
-        .cjx-weather, .cjx-scenario, .cjx-route-block {
+        .cjx-weather, .cjx-scenario {
             margin-top: 1.2rem;
         }
         .cjx-weather pre,
-        .cjx-scenario pre,
-        .cjx-route-block pre {
+        .cjx-scenario pre {
             background: var(--cjx-darkgray);
             color: var(--cjx-white);
             border-radius: 6px;
@@ -298,19 +297,6 @@
                     <b>Weather Briefing (Destination):</b>
                     <pre>{{ weather_brief_dest }}</pre>
                 </div>
-                {% if route_string %}
-                  {% if "No routing available in FlightPlanDatabase" in route_string %}
-                  <div class="cjx-route-block" style="color:#ff6b6b;">
-                      <b>Routing:</b>
-                      <pre>{{ route_string }}</pre>
-                  </div>
-                  {% elif "No route" not in route_string %}
-                  <div class="cjx-route-block">
-                      <b>Proposed Routing (FlightPlanDatabase):</b>
-                      <pre>{{ route_string }}</pre>
-                  </div>
-                  {% endif %}
-                {% endif %}
                 <div class="cjx-scenario">
                     <b>Flight Scenario:</b>
                     <pre>{{ random_scenario }}</pre>
