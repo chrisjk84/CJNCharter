@@ -25,8 +25,10 @@
             background: var(--cjx-darkgray);
             display: flex;
             align-items: center;
+            justify-content: space-between;
             padding: 2rem 2rem 1rem 2rem;
             border-bottom: 2px solid var(--cjx-accent);
+            position: relative;
         }
         .cjx-logo {
             font-size: 2.6rem;
@@ -41,6 +43,21 @@
             color: var(--cjx-lightgray);
             font-style: italic;
             opacity: 0.8;
+        }
+        .cjx-version {
+            position: absolute;
+            top: 1.2rem;
+            right: 2rem;
+            background: var(--cjx-accent);
+            color: var(--cjx-white);
+            font-size: 1.0rem;
+            font-weight: 600;
+            padding: 0.35em 0.9em;
+            border-radius: 14px;
+            letter-spacing: 1.5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.13);
+            z-index: 2;
+            pointer-events: none;
         }
         .cjx-content {
             max-width: 600px;
@@ -161,6 +178,17 @@
             white-space: pre-wrap;
         }
         @media (max-width: 700px) {
+            .cjx-header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 1.2rem 0.7rem 0.8rem 0.7rem;
+            }
+            .cjx-version {
+                position: static;
+                align-self: flex-end;
+                margin-bottom: 0.5rem;
+                margin-top: -1.2rem;
+            }
             .cjx-content, .cjx-dispatch-sheet {
                 padding: 1.1rem 0.8rem;
             }
@@ -173,8 +201,11 @@
 </head>
 <body>
     <div class="cjx-header">
-        <div class="cjx-logo">CJX Aviation Network</div>
-        <span class="cjx-tagline">Pilot Dispatch Portal &mdash; Homebase: New Orleans, Worldwide Service</span>
+        <div>
+            <div class="cjx-logo">CJX Aviation Network</div>
+            <span class="cjx-tagline">Pilot Dispatch Portal &mdash; Homebase: New Orleans, Worldwide Service</span>
+        </div>
+        <div class="cjx-version">V0.2b</div>
     </div>
     <div class="cjx-content">
         <div class="cjx-section-title">Flight Request Form</div>
