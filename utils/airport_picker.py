@@ -20,7 +20,7 @@ def get_random_destination(origin_icao, airports, max_nm=None, min_nm=None):
         lat1 = float(origin['latitude_deg'])
         lon1 = float(origin['longitude_deg'])
     except (ValueError, TypeError):
-            print{f"Invalid coordinates for origin airport:{origin}")
+            print(f"Invalid coordinates for origin airport:{origin}")
             return None
             
     eligible = []
