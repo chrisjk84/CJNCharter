@@ -3,6 +3,7 @@ fpdf
 reportlab
 python-dotenv
 gunicorn
+geopy
 pandas
 openai>=1.0.0
 requests
