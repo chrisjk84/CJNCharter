@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 AIRPORTS_CSV = os.path.join("data", "airports.csv")
 RUNWAYS_CSV = os.path.join("data", "runways.csv")
-AIRCRAFT_CSV = "aircraft.csv"  # Aircraft CSV at project root
+AIRCRAFT_CSV = os.path.join("data", "aircraft.csv")  # Aircraft CSV at project root
 
 client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 AVWX_API_KEY = os.getenv("AVWX_API_KEY")
