@@ -1,6 +1,6 @@
 import csv
 
-def load_airports(filepath):("data/airports.csv")  
+def load_airports(filepath):
     airports = []
     with open(filepath, newline='', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
