@@ -1,89 +1,66 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Charter Flight Briefing</title>
+    <title>Random Charter Flight Generator</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 2em auto;
-            max-width: 800px;
-            line-height: 1.6;
-            color: #333;
-        }
-        h1, h2, h3 {
-            color: #004080;
-        }
-        form input, form button {
-            font-size: 1.1em;
-            padding: 0.5em;
-            margin: 0.3em 0;
-            width: 100%;
-            max-width: 300px;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #004080;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #003366;
-        }
-        .section {
-            margin-top: 2em;
-            padding: 1em;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            background-color: #f9f9f9;
-        }
-        .scenario {
-            white-space: pre-wrap;
-            font-size: 1.15em;
-            font-weight: 500;
-            color: #222;
-        }
-        ul {
-            padding-left: 1.2em;
-        }
+        body { font-family: Arial, sans-serif; margin: 2em; }
+        label { font-weight: bold; }
+        .error { color: red; }
+        .filter-group { margin-bottom: 1em; }
     </style>
 </head>
 <body>
-    <h1>Charter Flight Briefing Generator</h1>
-
-    <form method="POST" action="/">
-        <label for="icao">ICAO Code:</label><br />
-        <input type="text" id="icao" name="icao" required placeholder="e.g. KJAX" /><br />
-
-        <label for="aircraft">Aircraft:</label><br />
-        <input type="text" id="aircraft" name="aircraft" required placeholder="e.g. CJ3" /><br />
-
-        <label for="min_runway_length">Min Runway Length (feet):</label><br />
-        <input type="number" id="min_runway_length" name="min_runway_length" value="{{ min_runway_length or 3000 }}" min="0" /><br />
-
-        <button type="submit">Generate Briefing</button>
+    <h1>Charter Flight Finder</h1>
+    <form method="POST">
+        <div class="filter-group">
+            <label>Departure ICAO:</label>
+            <input type="text" name="departure_icao" value="{{ user_input.departure_icao }}" required maxlength="6" style="text-transform:uppercase;">
+        </div>
+        <div class="filter-group">
+            <label>Min Distance (nm):</label>
+            <input type="number" name="min_distance" value="{{ user_input.min_distance }}" min="0" required>
+            <label>Max Distance (nm):</label>
+            <input type="number" name="max_distance" value="{{ user_input.max_distance }}" min="1" required>
+        </div>
+        <div class="filter-group">
+            <label>Min Runway Length (ft):</label>
+            <input type="number" name="min_runway_length" value="{{ user_input.min_runway_length }}" min="0" required>
+        </div>
+        <div class="filter-group">
+            <label>Runway Surface:</label>
+            <input type="checkbox" name="surface" value="turf" {% if 'turf' in user_input.surface %}checked{% endif %}>Grass/Turf
+            <input type="checkbox" name="surface" value="asph" {% if 'asph' in user_input.surface %}checked{% endif %}>Asphalt
+            <input type="checkbox" name="surface" value="grvl" {% if 'grvl' in user_input.surface %}checked{% endif %}>Gravel
+            <input type="checkbox" name="surface" value="concrete" {% if 'concrete' in user_input.surface %}checked{% endif %}>Concrete
+            <input type="checkbox" name="surface" value="dirt" {% if 'dirt' in user_input.surface %}checked{% endif %}>Dirt
+        </div>
+        <div class="filter-group">
+            <label>Max Passengers:</label>
+            <input type="number" name="max_passengers" value="{{ user_input.max_passengers }}" min="1" max="50" required>
+        </div>
+        <button type="submit">Find Destinations</button>
     </form>
 
-    {% if icao %}
-    <div class="section">
-        <h2>Briefing for Flight from {{ icao }}</h2>
-        <h3>Aircraft: {{ aircraft }}</h3>
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
 
-        <h3>Weather Summary</h3>
-        <p>{{ weather_summary }}</p>
-
-        <h3>Runways (min length: {{ min_runway_length }} ft)</h3>
-        <ul>
-            {% for runway in runways %}
-                <li>{{ runway }}</li>
+    {% if results %}
+        <h2>Matching Destinations</h2>
+        <table border="1" cellpadding="5" cellspacing="0">
+            <tr>
+                <th>ICAO</th>
+                <th>Name</th>
+                <th>Location</th>
+            </tr>
+            {% for r in results %}
+                <tr>
+                    <td>{{ r.icao }}</td>
+                    <td>{{ r.name }}</td>
+                    <td>{{ r.location }}</td>
+                </tr>
             {% endfor %}
-        </ul>
-
-        <h3>Flight Scenario</h3>
-        <p class="scenario">{{ scenario }}</p>
-    </div>
+        </table>
     {% endif %}
 </body>
 </html>
