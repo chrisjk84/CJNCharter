@@ -57,6 +57,8 @@ def index():
             )
             
             print("PDF path or object:", pdf_path, type(pdf_path))
+            if not pdf_path or not os.path.exists(pdf_path):
+            return f"<h2>PDF file not found at: {pdf_path}</h2>", 500
             return "<h2>PDF generate failed. Check server logs for details. </h2>", 500
             return send_file(pdf_path, as_attachment=True, download_name="charter.pdf", mimetype="application/pdf")
 
