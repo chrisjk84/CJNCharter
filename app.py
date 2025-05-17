@@ -155,10 +155,12 @@ def add_icao_field(airport):
 
 def generate_openai_scenario(dep, dest, distance_nm, metar, taf, pax):
     prompt = (
-        f"You are the pilot of a virtual charter flight from {dep['name']} ({dep['icao']}) to "
-        f"{dest['name']} ({dest['icao']}). The distance is {int(distance_nm)} nautical miles. "
+        f"Write a single-paragraph, immersive, and realistic scenario for a virtual charter flight "
+        f"from {dep['name']} ({dep['icao']}) to {dest['name']} ({dest['icao']}). The distance is {int(distance_nm)} nautical miles. "
         f"Current METAR at the destination: {metar}. TAF: {taf}. You have {pax} passengers. "
-        "Generate a short, immersive, and realistic scenario for this flight, including a reason for the trip, passenger details, and any interesting complications or decisions."
+        "Focus on the reason for the trip and the passenger background. "
+        "Only mention weather at the destination or arrival if it is notable or will directly affect the flight. "
+        "Do NOT invent in-flight emergencies, do NOT discuss enroute weather unless the real METAR/TAF suggests it, and do NOT continue past the first paragraph."
     )
     try:
         response = client.chat.completions.create(
@@ -167,7 +169,7 @@ def generate_openai_scenario(dep, dest, distance_nm, metar, taf, pax):
             max_tokens=200,
             temperature=0.8,
         )
-        return response.choices[0].message.content.strip()
+        return response.choices[0].message.content.strip().split('\n\n')[0]  # Only the first paragraph
     except Exception as e:
         return f"OpenAI error: {e}"
 
