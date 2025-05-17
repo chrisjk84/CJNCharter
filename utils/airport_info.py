@@ -13,7 +13,7 @@ def load_runways(filepath='data/runways.csv'):
 def filter_airports_by_runway_length(airports, runways, min_length):
     runway_lengths = {}
     for rwy in runways:
-        ident = rwy['airport_ident']
+        ident = rwy['ident']
         try:
             length = int(rwy.get('length_ft', 0) or 0)
             if ident not in runway_lengths or length > runway_lengths[ident]:
