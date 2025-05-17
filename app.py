@@ -153,13 +153,13 @@ def fetch_avwx_taf(icao):
 def add_icao_field(airport):
     airport["icao"] = airport.get("icao_code") or airport.get("gps_code") or airport.get("iata_code") or ""
 
-def generate_openai_scenario(dep, dest, distance_nm, metar, taf, pax):
+def generate_openai_scenario(dep, dest, distance_nm, dep_metar, dest_metar, dest_taf, pax):
     prompt = (
         f"Write a single-paragraph, immersive, and realistic scenario for a virtual charter flight "
         f"from {dep['name']} ({dep['icao']}) to {dest['name']} ({dest['icao']}). The distance is {int(distance_nm)} nautical miles. "
-        f"Current METAR at the destination: {metar}. TAF: {taf}. You have {pax} passengers. "
+        f"Departure airport METAR: {dep_metar}. Destination airport METAR: {dest_metar}. Destination TAF: {dest_taf}. You have {pax} passengers. "
         "Focus on the reason for the trip and the passenger background. "
-        "Only mention weather at the destination or arrival if it is notable or will directly affect the flight. "
+        "Only mention weather at departure or destination if it is notable or will directly affect the flight. "
         "Do NOT invent in-flight emergencies, do NOT discuss enroute weather unless the real METAR/TAF suggests it, and do NOT continue past the first paragraph."
     )
     try:
@@ -178,6 +178,8 @@ def index():
     error = ""
     random_scenario = None
     weather_brief = None
+    weather_brief_dep = None
+    weather_brief_dest = None
     airport_info = None
     results = []
     user_input = {
@@ -227,10 +229,12 @@ def index():
                     )
                     add_icao_field(dep_airport)
                     add_icao_field(dest_full)
-                    metar = fetch_avwx_metar(dest_full["icao"])
-                    taf = fetch_avwx_taf(dest_full["icao"])
-                    weather_brief = f"METAR: {metar}\nTAF: {taf}"
-                    scenario = generate_openai_scenario(dep_airport, dest_full, distance, metar, taf, max_pax)
+                    dep_metar = fetch_avwx_metar(dep_airport["icao"])
+                    dest_metar = fetch_avwx_metar(dest_full["icao"])
+                    dest_taf = fetch_avwx_taf(dest_full["icao"])
+                    weather_brief_dep = dep_metar
+                    weather_brief_dest = f"METAR: {dest_metar}\nTAF: {dest_taf}"
+                    scenario = generate_openai_scenario(dep_airport, dest_full, distance, dep_metar, dest_metar, dest_taf, max_pax)
                     random_scenario = scenario
                     airport_info = {
                         "icao": dest_full["icao"],
@@ -257,7 +261,8 @@ def index():
         error=error,
         user_input=user_input,
         random_scenario=random_scenario,
-        weather_brief=weather_brief,
+        weather_brief_dep=weather_brief_dep,
+        weather_brief_dest=weather_brief_dest,
         airport_info=airport_info
     )
 
