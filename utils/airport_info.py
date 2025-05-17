@@ -1,56 +1,25 @@
 import csv
-import random
-from math import radians, cos, sin, asin, sqrt
 
-def load_airports(filepath='data/airports.csv'):
-    with open(filepath, newline='') as csvfile:
-        return list(csv.DictReader(csvfile))
+def load_runway_data(filepath):
+    with open(filepath, newline='') as f:
+        reader = csv.DictReader(f)
+        return list(reader)
 
-def load_runways(filepath='data/runways.csv'):
-    with open(filepath, newline='') as csvfile:
-        return list(csv.DictReader(csvfile))
+def get_runway_summary(icao, runways):
+    matching = [r for r in runways if r.get("ident") == icao]
+    summary = []
+    for r in matching:
+        summary.append(f"{r.get('surface', 'UNK')} {r.get('length_ft', '???')}ft Runway {r.get('le_ident', '')}/{r.get('he_ident', '')}")
+    return "\n".join(summary) or "No runway data available."
 
 def filter_airports_by_runway_length(airports, runways, min_length):
-    runway_lengths = {}
-    for rwy in runways:
-        ident = rwy['ident']
+    longest_by_ident = {}
+    for r in runways:
+        ident = r.get("ident")
         try:
-            length = int(rwy.get('length_ft', 0) or 0)
-            if ident not in runway_lengths or length > runway_lengths[ident]:
-                runway_lengths[ident] = length
+            length = int(r.get("length_ft") or 0)
+            if ident and (ident not in longest_by_ident or length > longest_by_ident[ident]):
+                longest_by_ident[ident] = length
         except:
             continue
-    return [a for a in airports if runway_lengths.get(a['ident'], 0) >= min_length]
-
-def haversine(lat1, lon1, lat2, lon2):
-    # Radius of earth in nautical miles
-    R = 3440.065
-    lat1, lon1, lat2, lon2 = map(radians, [float(lat1), float(lon1), float(lat2), float(lon2)])
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-    c = 2 * asin(sqrt(a))
-    return R * c
-
-def get_random_destination(origin_icao, airports, max_nm=None, min_nm=None):
-    origin = next((a for a in airports if a['ident'] == origin_icao), None)
-    if not origin:
-        return None
-
-    lat1 = origin['latitude_deg']
-    lon1 = origin['longitude_deg']
-
-    eligible = []
-    for airport in airports:
-        if airport['ident'] == origin_icao:
-            continue
-        lat2 = airport['latitude_deg']
-        lon2 = airport['longitude_deg']
-        dist = haversine(lat1, lon1, lat2, lon2)
-        if (min_nm is None or dist >= min_nm) and (max_nm is None or dist <= max_nm):
-            eligible.append(airport)
-
-    if not eligible:
-        return None
-
-    return random.choice(eligible)['ident']
+    return [a for a in airports if longest_by_ident.get(a["ident"], 0) >= min_length]

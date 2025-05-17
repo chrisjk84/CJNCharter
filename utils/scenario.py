@@ -1,23 +1,25 @@
 import os
-from openai import OpenAI
+import openai
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
-def generate_scenario(departure, destination, aircraft):
-    prompt = f"""
-    You are a charter dispatcher. Generate a realistic short backstory for a charter flight using a {aircraft} departing {departure} and flying to {destination}.
-    Include the purpose of the trip, passenger profile, and any urgency or special instructions.
-    Keep it under 100 words.
-    """
+def generate_scenario(departure_icao, arrival_icao, aircraft):
+    prompt = (
+        f"Create a realistic charter flight mission scenario from {departure_icao} to {arrival_icao} "
+        f"using a {aircraft}. Include weather considerations, passenger purpose, and any operational challenges. "
+        f"Make it sound like a briefing paragraph."
+    )
 
     try:
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+        response = openai.chat.completions.create(
+            model="gpt-4",
             messages=[
+                {"role": "system", "content": "You are a flight dispatcher writing charter flight briefings."},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.8
+            max_tokens=300
         )
         return response.choices[0].message.content.strip()
+
     except Exception as e:
-        return f"Scenario unavailable (error: {e})"
+        return f"Unable to generate scenario: {str(e)}"
