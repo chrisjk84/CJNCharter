@@ -30,13 +30,9 @@
             border-bottom: 2px solid var(--cjx-accent);
             position: relative;
         }
-        .cjx-logo {
-            font-size: 2.6rem;
-            font-weight: bold;
-            color: var(--cjx-white);
-            letter-spacing: 2px;
-            margin-right: 1.5rem;
-            font-family: 'Segoe UI', 'Arial', sans-serif;
+        .cjx-logo-img {
+            height: 56px;
+            display: block;
         }
         .cjx-tagline {
             font-size: 1.2rem;
@@ -222,13 +218,16 @@
                 max-width: 100%;
                 min-width: 0;
             }
+            .cjx-logo-img {
+                height: 44px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="cjx-header">
         <div>
-            <div class="cjx-logo">CJX Aviation Network</div>
+            <img src="{{ url_for('static', filename='CJX-Aviation-Network-logo.png') }}" alt="CJX Aviation Network Logo" class="cjx-logo-img">
             <span class="cjx-tagline">Pilot Dispatch Portal &mdash; Homebase: New Orleans, Worldwide Service</span>
         </div>
         <div class="cjx-version">V0.2.2b</div>
