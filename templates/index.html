@@ -186,6 +186,22 @@
             font-size: 1.05rem;
             white-space: pre-wrap;
         }
+        .simbrief-btn {
+            display: inline-block;
+            background: #6c757d;
+            color: #fff;
+            font-weight: bold;
+            padding: 0.7em 1.8em;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1.12rem;
+            margin: 1.5rem 0;
+            transition: background 0.16s;
+        }
+        .simbrief-btn:hover, .simbrief-btn:focus {
+            background: #4682b4;
+            color: #fff;
+        }
         .cjx-footer {
             text-align: center;
             color: var(--cjx-lightgray);
@@ -227,10 +243,10 @@
 <body>
     <div class="cjx-header">
         <div>
-            <img src="{{ url_for('static', filename='template/CJX-Aviation-Network-logo.png') }}" alt="CJX Aviation Network Logo" class="cjx-logo-img">
+            <img src="{{ url_for('static', filename='CJX-Aviation-Network-logo.png') }}" alt="CJX Aviation Network Logo" class="cjx-logo-img">
             <span class="cjx-tagline">Pilot Dispatch Portal &mdash; Homebase: New Orleans, Worldwide Service</span>
         </div>
-        <div class="cjx-version">V0.2.2b</div>
+        <div class="cjx-version">V0.2.3b</div>
     </div>
     <div class="cjx-content">
         <div class="cjx-section-title">Flight Request Form</div>
@@ -276,6 +292,15 @@
 
         {% if random_scenario %}
             <div class="cjx-dispatch-sheet">
+                {% if airport_info and user_input.departure_icao and airport_info.icao %}
+                <div style="text-align:center;">
+                  <a href="https://www.simbrief.com/system/dispatch.php?orig={{ user_input.departure_icao|upper }}&dest={{ airport_info.icao|upper }}" 
+                     target="_blank" 
+                     class="simbrief-btn">
+                    Go to SimBrief Dispatch
+                  </a>
+                </div>
+                {% endif %}
                 <div class="cjx-dispatch-title">CJX Dispatch Sheet</div>
                 <div class="cjx-row">
                     <div class="cjx-info-block">
