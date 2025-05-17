@@ -104,8 +104,8 @@ def find_destinations(dep_icao, min_dist, max_dist, min_rwy_len, surfaces, max_p
 
 def fetch_avwx_metar(icao):
     key = AVWX_API_KEY
-    if not key or not icao:
-        return "No API key or ICAO code."
+    if not key or not icao or len(icao) != 4 or not icao.isalpha():
+        return "No API key or valid ICAO code."
     url = f"https://avwx.rest/api/metar/{icao}"
     headers = {
         "Authorization": key,
@@ -114,15 +114,21 @@ def fetch_avwx_metar(icao):
     try:
         resp = requests.get(url, headers=headers, timeout=10)
         if resp.ok:
-            data = resp.json()
+            if not resp.text.strip():
+                return "No METAR available (empty response)."
+            try:
+                data = resp.json()
+            except Exception as e:
+                return f"AVWX METAR error: Invalid JSON ({resp.text[:200]})"
             return data.get("raw", "No METAR found.")
-        return "No METAR available."
+        else:
+            return f"AVWX METAR error: HTTP {resp.status_code} ({resp.text[:200]})"
     except Exception as e:
         return f"AVWX METAR error: {e}"
 
 def fetch_avwx_taf(icao):
     key = AVWX_API_KEY
-    if not key or not icao:
+    if not key or not icao or len(icao) != 4 or not icao.isalpha():
         return ""
     url = f"https://avwx.rest/api/taf/{icao}"
     headers = {
@@ -132,9 +138,15 @@ def fetch_avwx_taf(icao):
     try:
         resp = requests.get(url, headers=headers, timeout=10)
         if resp.ok:
-            data = resp.json()
+            if not resp.text.strip():
+                return ""
+            try:
+                data = resp.json()
+            except Exception as e:
+                return ""
             return data.get("raw", "")
-        return ""
+        else:
+            return ""
     except Exception:
         return ""
 
