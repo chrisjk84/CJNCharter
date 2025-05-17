@@ -1,57 +1,244 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Random Charter Flight Generator</title>
+    <title>CJX Aviation Network - Pilot Portal</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { font-family: Arial, sans-serif; margin: 2em; }
-        label { font-weight: bold; }
-        .error { color: red; }
-        .filter-group { margin-bottom: 1em; }
+        :root {
+            --cjx-black: #141414;
+            --cjx-darkgray: #23272a;
+            --cjx-lightgray: #e0e0e0;
+            --cjx-white: #ffffff;
+            --cjx-accent: #6c757d;
+            --cjx-blue: #4682b4;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: var(--cjx-black);
+            color: var(--cjx-lightgray);
+            font-family: 'Segoe UI', 'Arial', 'Helvetica Neue', sans-serif;
+        }
+        .cjx-header {
+            background: var(--cjx-darkgray);
+            display: flex;
+            align-items: center;
+            padding: 2rem 2rem 1rem 2rem;
+            border-bottom: 2px solid var(--cjx-accent);
+        }
+        .cjx-logo {
+            font-size: 2.6rem;
+            font-weight: bold;
+            color: var(--cjx-white);
+            letter-spacing: 2px;
+            margin-right: 1.5rem;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+        }
+        .cjx-tagline {
+            font-size: 1.2rem;
+            color: var(--cjx-lightgray);
+            font-style: italic;
+            opacity: 0.8;
+        }
+        .cjx-content {
+            max-width: 600px;
+            margin: 2rem auto;
+            background: var(--cjx-darkgray);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.32);
+            padding: 2.5rem 2rem;
+        }
+        .cjx-section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.2rem;
+            color: var(--cjx-white);
+            letter-spacing: 0.5px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.1rem;
+        }
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.3rem;
+            color: var(--cjx-lightgray);
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 0.7rem 0.9rem;
+            border: 1px solid var(--cjx-accent);
+            border-radius: 6px;
+            background: var(--cjx-black);
+            color: var(--cjx-lightgray);
+            font-size: 1rem;
+            margin-top: 0.2rem;
+        }
+        input[type="checkbox"] {
+            accent-color: var(--cjx-accent);
+            margin-right: 0.4em;
+        }
+        .cjx-checkbox-group label {
+            display: inline-block;
+            margin-right: 1.2rem;
+            font-weight: normal;
+        }
+        button[type="submit"] {
+            margin-top: 1.5rem;
+            padding: 0.9rem 0;
+            background: linear-gradient(90deg, var(--cjx-accent) 0%, var(--cjx-darkgray) 100%);
+            color: var(--cjx-white);
+            border: none;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        }
+        button[type="submit"]:hover {
+            background: linear-gradient(90deg, var(--cjx-white) 0%, var(--cjx-accent) 100%);
+            color: var(--cjx-black);
+        }
+        .error {
+            color: #ff6b6b;
+            background: rgba(255,107,107,0.06);
+            padding: 0.7em;
+            border-radius: 6px;
+            margin-top: 0.5em;
+            font-weight: 600;
+        }
+        .cjx-dispatch-sheet {
+            margin-top: 2.5rem;
+            background: var(--cjx-black);
+            border: 1.5px solid var(--cjx-accent);
+            border-radius: 10px;
+            padding: 2rem 1.5rem;
+            color: var(--cjx-white);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.22);
+        }
+        .cjx-dispatch-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1.2rem;
+            color: var(--cjx-lightgray);
+            letter-spacing: 1px;
+            text-align: center;
+        }
+        .cjx-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        .cjx-info-block {
+            flex: 1 1 220px;
+            background: var(--cjx-darkgray);
+            margin-bottom: 0.7rem;
+            padding: 1rem 1rem 0.7rem 1rem;
+            border-radius: 7px;
+            border: 1px solid var(--cjx-accent);
+        }
+        .cjx-info-block b {
+            color: var(--cjx-lightgray);
+        }
+        .cjx-weather, .cjx-scenario {
+            margin-top: 1.2rem;
+        }
+        .cjx-weather pre,
+        .cjx-scenario pre {
+            background: var(--cjx-darkgray);
+            color: var(--cjx-white);
+            border-radius: 6px;
+            padding: 1rem;
+            font-family: 'Fira Mono', 'Consolas', monospace;
+            font-size: 1.05rem;
+            white-space: pre-wrap;
+        }
+        @media (max-width: 700px) {
+            .cjx-content, .cjx-dispatch-sheet {
+                padding: 1.1rem 0.8rem;
+            }
+            .cjx-row {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>Charter Flight Generator</h1>
-    <form method="POST">
-        <div class="filter-group">
-            <label>Departure ICAO:</label>
-            <input type="text" name="departure_icao" value="{{ user_input.departure_icao }}" required maxlength="6" style="text-transform:uppercase;">
-        </div>
-        <div class="filter-group">
-            <label>Min Distance (nm):</label>
-            <input type="number" name="min_distance" value="{{ user_input.min_distance }}" min="0" required>
-            <label>Max Distance (nm):</label>
-            <input type="number" name="max_distance" value="{{ user_input.max_distance }}" min="1" required>
-        </div>
-        <div class="filter-group">
-            <label>Min Runway Length (ft):</label>
-            <input type="number" name="min_runway_length" value="{{ user_input.min_runway_length }}" min="0" required>
-        </div>
-        <div class="filter-group">
-            <label>Runway Surface:</label>
-            <input type="checkbox" name="surface" value="turf" {% if 'turf' in user_input.surface %}checked{% endif %}>Grass/Turf
-            <input type="checkbox" name="surface" value="asph" {% if 'asph' in user_input.surface %}checked{% endif %}>Asphalt
-            <input type="checkbox" name="surface" value="grvl" {% if 'grvl' in user_input.surface %}checked{% endif %}>Gravel
-            <input type="checkbox" name="surface" value="concrete" {% if 'concrete' in user_input.surface %}checked{% endif %}>Concrete
-            <input type="checkbox" name="surface" value="dirt" {% if 'dirt' in user_input.surface %}checked{% endif %}>Dirt
-        </div>
-        <div class="filter-group">
-            <label>Max Passengers:</label>
-            <input type="number" name="max_passengers" value="{{ user_input.max_passengers }}" min="1" max="50" required>
-        </div>
-        <button type="submit">Generate Charter Flight</button>
-    </form>
+    <div class="cjx-header">
+        <div class="cjx-logo">CJX Aviation Network</div>
+        <span class="cjx-tagline">Pilot Dispatch Portal &mdash; Homebase: New Orleans, Worldwide Service</span>
+    </div>
+    <div class="cjx-content">
+        <div class="cjx-section-title">Flight Request Form</div>
+        <form method="POST">
+            <div>
+                <label>Departure ICAO:</label>
+                <input type="text" name="departure_icao" value="{{ user_input.departure_icao }}" required maxlength="6" style="text-transform:uppercase;">
+            </div>
+            <div class="cjx-row">
+                <div>
+                    <label>Min Distance (nm):</label>
+                    <input type="number" name="min_distance" value="{{ user_input.min_distance }}" min="0" required>
+                </div>
+                <div>
+                    <label>Max Distance (nm):</label>
+                    <input type="number" name="max_distance" value="{{ user_input.max_distance }}" min="1" required>
+                </div>
+                <div>
+                    <label>Min Runway Length (ft):</label>
+                    <input type="number" name="min_runway_length" value="{{ user_input.min_runway_length }}" min="0" required>
+                </div>
+                <div>
+                    <label>Max Passengers:</label>
+                    <input type="number" name="max_passengers" value="{{ user_input.max_passengers }}" min="1" max="50" required>
+                </div>
+            </div>
+            <div class="cjx-checkbox-group">
+                <label>Runway Surface:</label><br>
+                <label><input type="checkbox" name="surface" value="turf" {% if 'turf' in user_input.surface %}checked{% endif %}>Grass/Turf</label>
+                <label><input type="checkbox" name="surface" value="asph" {% if 'asph' in user_input.surface %}checked{% endif %}>Asphalt</label>
+                <label><input type="checkbox" name="surface" value="grvl" {% if 'grvl' in user_input.surface %}checked{% endif %}>Gravel</label>
+                <label><input type="checkbox" name="surface" value="concrete" {% if 'concrete' in user_input.surface %}checked{% endif %}>Concrete</label>
+                <label><input type="checkbox" name="surface" value="dirt" {% if 'dirt' in user_input.surface %}checked{% endif %}>Dirt</label>
+            </div>
+            <button type="submit">Generate Dispatch Sheet</button>
+        </form>
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
 
-    {% if error %}
-        <div class="error">{{ error }}</div>
-    {% endif %}
-
-    {% if random_scenario %}
-        <h2>Charter Flight Scenario</h2>
-        <b>Destination:</b> {{ airport_info.icao }} - {{ airport_info.name }} ({{ airport_info.location }})<br>
-        <b>Elevation:</b> {{ airport_info.elevation }} ft<br>
-        <b>Runway:</b> {{ airport_info.runway }}<br>
-        <b>Weather Brief:</b><pre>{{ weather_brief }}</pre>
-        <b>Scenario:</b> <pre>{{ random_scenario }}</pre>
-    {% endif %}
+        {% if random_scenario %}
+            <div class="cjx-dispatch-sheet">
+                <div class="cjx-dispatch-title">CJX Dispatch Sheet</div>
+                <div class="cjx-row">
+                    <div class="cjx-info-block">
+                        <b>Destination:</b><br>
+                        {{ airport_info.icao }} - {{ airport_info.name }}<br>
+                        <span style="color:var(--cjx-accent);font-size:0.98em;">{{ airport_info.location }}</span>
+                    </div>
+                    <div class="cjx-info-block">
+                        <b>Field Elevation:</b> {{ airport_info.elevation }} ft<br>
+                        <b>Primary Runway:</b><br> {{ airport_info.runway }}
+                    </div>
+                </div>
+                <div class="cjx-weather">
+                    <b>Weather Briefing:</b>
+                    <pre>{{ weather_brief }}</pre>
+                </div>
+                <div class="cjx-scenario">
+                    <b>Flight Scenario:</b>
+                    <pre>{{ random_scenario }}</pre>
+                </div>
+            </div>
+        {% endif %}
+    </div>
 </body>
 </html>
