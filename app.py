@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 AIRPORTS_CSV = os.path.join("data", "airports.csv")
 RUNWAYS_CSV = os.path.join("data", "runways.csv")
-AIRCRAFT_CSV = "data/aircraft.csv"  # New: aircraft file at root
+AIRCRAFT_CSV = os.path.join("data", "aircraft.csv")  # Updated to match your file location
 
 client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 AVWX_API_KEY = os.getenv("AVWX_API_KEY")
@@ -28,14 +28,17 @@ def load_aircraft():
     aircraft = []
     if os.path.exists(AIRCRAFT_CSV):
         try:
-            with open(AIRCRAFT_CSV, newline='') as csvfile:
+            with open(AIRCRAFT_CSV, newline='', encoding='utf-8') as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
+                    # Compose display name from Make, Model, ICAO Code
+                    name = f"{row['Make']} {row['Model']} ({row['ICAO Code']})"
                     aircraft.append({
-                        'name': row['name'],
-                        'max_passengers': int(row['max_passengers']),
-                        'min_landing_distance': int(row['min_landing_distance']),
-                        'max_range': int(row['max_range'])
+                        'name': name,
+                        'icao_code': row['ICAO Code'],
+                        'max_passengers': int(row['Max Passengers']),
+                        'min_landing_distance': int(row['Min Landing Distance (ft)']),
+                        'max_range': int(row['Max Range (nm)'])
                     })
         except Exception as e:
             print(f"Error loading aircraft.csv: {e}")
