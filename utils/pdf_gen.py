@@ -8,8 +8,6 @@ def generate_pdf(
     aircraft,
     scenario,
     arrival_taf,
-    departure_metar_decoded,
-    arrival_metar_decoded,
     departure_runways,
     arrival_runways,
     departure_summary,
