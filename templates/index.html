@@ -30,9 +30,17 @@
             border-bottom: 2px solid var(--cjx-accent);
             position: relative;
         }
+        .cjx-header-center {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
         .cjx-logo-img {
             height: 56px;
             display: block;
+            margin: 0 auto 0.6rem auto;
         }
         .cjx-tagline {
             font-size: 1.2rem;
@@ -242,7 +250,7 @@
 </head>
 <body>
     <div class="cjx-header">
-        <div>
+        <div class="cjx-header-center">
             <img src="{{ url_for('static', filename='CJX-Aviation-Network-logo.png') }}" alt="CJX Aviation Network Logo" class="cjx-logo-img">
             <span class="cjx-tagline">Pilot Dispatch Portal &mdash; Homebase: New Orleans, Worldwide Service</span>
         </div>
@@ -332,4 +340,4 @@
         &copy; 2025 Chris Keever 2025
     </div>
 </body>
-</html>
+</html>V
