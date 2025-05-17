@@ -11,8 +11,8 @@ app = Flask(__name__)
 AIRPORTS_CSV = os.path.join("data", "airports.csv")
 RUNWAYS_CSV = os.path.join("data", "runways.csv")
 
-# Set your OpenAI API key from environment variable
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Initialize OpenAI client with new API (v1+)
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # AVWX API Key from environment
 AVWX_API_KEY = os.getenv("AVWX_API_KEY")
@@ -149,13 +149,13 @@ def generate_openai_scenario(dep, dest, distance_nm, metar, taf, pax):
         "Generate a short, immersive, and realistic scenario for this flight, including a reason for the trip, passenger details, and any interesting complications or decisions."
     )
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt}],
             max_tokens=200,
             temperature=0.8,
         )
-        return response.choices[0].message['content'].strip()
+        return response.choices[0].message.content.strip()
     except Exception as e:
         return f"OpenAI error: {e}"
 
