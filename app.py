@@ -18,7 +18,6 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 AVWX_API_KEY = os.getenv("AVWX_API_KEY")
 
 def haversine(lat1, lon1, lat2, lon2):
-    # Calculate great-circle distance between two points (in NM)
     R = 3440.065  # Radius of Earth in nautical miles
     phi1 = math.radians(float(lat1))
     phi2 = math.radians(float(lat2))
@@ -104,7 +103,6 @@ def find_destinations(dep_icao, min_dist, max_dist, min_rwy_len, surfaces, max_p
     return results
 
 def fetch_avwx_metar(icao):
-    """Fetch METAR from AVWX for a given ICAO code."""
     key = AVWX_API_KEY
     if not key or not icao:
         return "No API key or ICAO code."
@@ -123,7 +121,6 @@ def fetch_avwx_metar(icao):
         return f"AVWX METAR error: {e}"
 
 def fetch_avwx_taf(icao):
-    """Fetch TAF from AVWX for a given ICAO code."""
     key = AVWX_API_KEY
     if not key or not icao:
         return ""
@@ -161,11 +158,11 @@ def generate_openai_scenario(dep, dest, distance_nm, metar, taf, pax):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    results = []
     error = ""
     random_scenario = None
     weather_brief = None
     airport_info = None
+    results = []
     user_input = {
         "departure_icao": "",
         "min_distance": "50",
@@ -198,10 +195,9 @@ def index():
                 results = find_destinations(dep_icao, min_dist, max_dist, min_rwy_len, surfaces, max_pax)
                 if not results:
                     error = "No results found with the current filters."
-                elif 'random_flight' in request.form:
+                else:
                     dep_airport = get_airport_by_icao(load_airports(), dep_icao)
                     dest = random.choice(results)
-                    # Lookup full destination info
                     airports = load_airports()
                     dest_full = None
                     for a in airports:
@@ -224,7 +220,6 @@ def index():
                         "elevation": dest_full.get("elevation_ft", ""),
                         "runway": "See below"
                     }
-                    # Find a suitable runway at destination
                     runways = load_runways()
                     rwylist = [r for r in runways if r["airport_ref"] == dest_full["id"] and
                                int(r["length_ft"] or 0) >= min_rwy_len and
@@ -240,7 +235,6 @@ def index():
             error = f"Error: {e}"
     return render_template(
         'index.html',
-        results=results,
         error=error,
         user_input=user_input,
         random_scenario=random_scenario,

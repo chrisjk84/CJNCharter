@@ -10,7 +10,7 @@
     </style>
 </head>
 <body>
-    <h1>Charter Flight Finder</h1>
+    <h1>Charter Flight Generator</h1>
     <form method="POST">
         <div class="filter-group">
             <label>Departure ICAO:</label>
@@ -38,34 +38,15 @@
             <label>Max Passengers:</label>
             <input type="number" name="max_passengers" value="{{ user_input.max_passengers }}" min="1" max="50" required>
         </div>
-        <button type="submit">Find Destinations</button>
-        <button type="submit" name="random_flight" value="1">Generate Random Charter</button>
+        <button type="submit">Generate Charter Flight</button>
     </form>
 
     {% if error %}
         <div class="error">{{ error }}</div>
     {% endif %}
 
-    {% if results %}
-        <h2>Matching Destinations</h2>
-        <table border="1" cellpadding="5" cellspacing="0">
-            <tr>
-                <th>ICAO</th>
-                <th>Name</th>
-                <th>Location</th>
-            </tr>
-            {% for r in results %}
-                <tr>
-                    <td>{{ r.icao }}</td>
-                    <td>{{ r.name }}</td>
-                    <td>{{ r.location }}</td>
-                </tr>
-            {% endfor %}
-        </table>
-    {% endif %}
-
     {% if random_scenario %}
-        <h2>Random Charter Scenario</h2>
+        <h2>Charter Flight Scenario</h2>
         <b>Destination:</b> {{ airport_info.icao }} - {{ airport_info.name }} ({{ airport_info.location }})<br>
         <b>Elevation:</b> {{ airport_info.elevation }} ft<br>
         <b>Runway:</b> {{ airport_info.runway }}<br>
