@@ -30,8 +30,6 @@ def get_weather_summary(icao):
 METAR:
 {metar.get('raw', 'N/A')}
 
-Decoded: {metar.get('sanitized', 'N/A')}
-
 TAF:
 {taf.get('raw', 'N/A')}
 """

@@ -39,8 +39,6 @@ def index():
 
             departure_weather = get_weather_summary(icao)
             arrival_weather = get_weather_summary(destination_icao)
-            print("Departure weather:", departure_weather)
-            print("Arrival weather:", arrival_weather)
             departure_runways = get_runway_summary(icao, runway_data)
             arrival_runways = get_runway_summary(destination_icao, runway_data)
 
