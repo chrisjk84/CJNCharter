@@ -55,8 +55,9 @@ def index():
                 departure_summary=departure_weather["summary"],
                 arrival_summary=arrival_weather["summary"]
             )
-
-            return send_file(pdf_path, as_attachment=True)
+            
+            print("PDF path or object:", pdf_path, type(pdf_path))
+            return send_file(pdf_path, as_attachment=True, download_name="charter.pdf", mimetype="application/pdf")
 
         except Exception as e:
             traceback.print_exc()
