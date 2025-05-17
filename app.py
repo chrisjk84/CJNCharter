@@ -15,7 +15,6 @@ def index():
         aircraft = request.form.get("aircraft")
         min_distance = int(request.form.get("min_distance", 0))
         max_distance = int(request.form.get("max_distance", 1000))
-        min_runway_length = int(request.form.get("min_runway_length", 0))
 
         # Get list of viable destination airports
         destinations = get_airports_within_range(
