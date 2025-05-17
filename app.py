@@ -138,6 +138,9 @@ def fetch_avwx_taf(icao):
     except Exception:
         return ""
 
+def add_icao_field(airport):
+    airport["icao"] = airport.get("icao_code") or airport.get("gps_code") or airport.get("iata_code") or ""
+
 def generate_openai_scenario(dep, dest, distance_nm, metar, taf, pax):
     prompt = (
         f"You are the pilot of a virtual charter flight from {dep['name']} ({dep['icao']}) to "
@@ -208,13 +211,15 @@ def index():
                         float(dep_airport["latitude_deg"]), float(dep_airport["longitude_deg"]),
                         float(dest_full["latitude_deg"]), float(dest_full["longitude_deg"])
                     )
-                    metar = fetch_avwx_metar(dest_full["icao_code"])
-                    taf = fetch_avwx_taf(dest_full["icao_code"])
+                    add_icao_field(dep_airport)
+                    add_icao_field(dest_full)
+                    metar = fetch_avwx_metar(dest_full["icao"])
+                    taf = fetch_avwx_taf(dest_full["icao"])
                     weather_brief = f"METAR: {metar}\nTAF: {taf}"
                     scenario = generate_openai_scenario(dep_airport, dest_full, distance, metar, taf, max_pax)
                     random_scenario = scenario
                     airport_info = {
-                        "icao": dest_full["icao_code"],
+                        "icao": dest_full["icao"],
                         "name": dest_full["name"],
                         "location": f"{dest_full.get('municipality','')}, {dest_full.get('iso_region','')}",
                         "elevation": dest_full.get("elevation_ft", ""),
