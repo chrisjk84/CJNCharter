@@ -56,14 +56,6 @@ def index():
                 arrival_summary=arrival_weather["summary"]
             )
             
-            print("PDF path or object:", pdf_path, type(pdf_path))
-            if not pdf_path or not os.path.exists(pdf_path):
-            return f"<h2>PDF file not found at: {pdf_path}</h2>", 500
-            return "<h2>PDF generate failed. Check server logs for details. </h2>", 500
-            return send_file(pdf_path, as_attachment=True, download_name="charter.pdf", mimetype="application/pdf")
-
-        except Exception as e:
-            traceback.print_exc()
-            return f"<h2>Error: {e}</h2><p>Check the logs for more details.</p>", 400
+    return send_file(pdf_path, as_attachment=True, download_name="charter.pdf", mimetype="application/pdf")
 
     return render_template('index.html')
