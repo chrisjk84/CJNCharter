@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Charter Briefing</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        h1, h2 { color: #003366; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>Charter Briefing</h1>
+    <h2>Overview</h2>
+    <p><strong>Aircraft:</strong> {{ aircraft }}</p>
+    <p><strong>From:</strong> {{ departure_icao }} &nbsp; <strong>To:</strong> {{ destination_icao }}</p>
+
+    <h2>Scenario</h2>
+    <pre>{{ scenario }}</pre>
+
+    <h2>Departure Weather</h2>
+    <pre>{{ departure_weather["summary"] }}</pre>
+
+    <h2>Arrival Weather</h2>
+    <pre>{{ arrival_weather["summary"] }}</pre>
+
+    <h2>Departure Runways</h2>
+    <pre>{{ departure_runways }}</pre>
+
+    <h2>Arrival Runways</h2>
+    <pre>{{ arrival_runways }}</pre>
+</body>
+</html>

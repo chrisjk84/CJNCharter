@@ -44,18 +44,16 @@ def index():
 
             scenario = generate_scenario(icao, destination_icao, aircraft)
 
-            pdf_path = generate_pdf(
-                icao,
-                destination_icao,
-                aircraft,
-                scenario,
-                arrival_taf=arrival_weather["taf"],
-                departure_runways=departure_runways,
-                arrival_runways=arrival_runways,
-                departure_summary=departure_weather["summary"],
-                arrival_summary=arrival_weather["summary"]
-            )
-            
-    return send_file(pdf_path, as_attachment=True, download_name="charter.pdf", mimetype="application/pdf")
+    return render_template(
+        'briefing.html',
+        departure_icao=icao,
+        destination_icao=destination_icao,
+        aircraft=aircraft,
+        scenario=scenario,
+        departure_weather=departure_weather,
+        arrival_weather=arrival_weather,
+        departure_runways=departure_runways,
+        arrival_runways=arrival_runways
+)
 
     return render_template('index.html')
