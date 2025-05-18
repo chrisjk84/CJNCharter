@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, Pilot, Aircraft
+from models import db, Pilot, Aircraft  # Add other models as needed
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev_secret_key")
@@ -12,7 +12,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cjx_pilots.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
-migrate = Migrate(app, db)  # <-- Added line
+migrate = Migrate(app, db)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -41,7 +41,7 @@ def register():
             new_pilot = Pilot(
                 username=username,
                 email=email,
-                password_hash=generate_password_hash(password),
+                password_hash=generate_password_hash(password)
             )
             db.session.add(new_pilot)
             db.session.commit()
@@ -70,6 +70,15 @@ def logout():
     flash("You have been logged out.", "success")
     return redirect(url_for("login"))
 
+# --- NEW PAGE: Company Financials ---
+@app.route("/company_financials")
+@login_required
+def company_financials():
+    # Example: get data, e.g. CompanyFinancialLog.query.all()
+    # For now, just render the template
+    return render_template("company_financials.html")
+
+# Only run db.create_all() for local development
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
