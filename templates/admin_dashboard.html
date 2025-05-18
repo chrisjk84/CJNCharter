@@ -3,9 +3,10 @@
 <h1>Admin Dashboard</h1>
 
 <h2>Pilots</h2>
+<a href="{{ url_for('register') }}">Add Pilot (via registration)</a>
 <table border="1">
   <tr>
-    <th>ID</th><th>Username</th><th>Email</th><th>Admin?</th><th>Actions</th>
+    <th>ID</th><th>Username</th><th>Email</th><th>Admin?</th><th>Fleet</th><th>Grounded?</th><th>Actions</th>
   </tr>
   {% for pilot in pilots %}
     <tr>
@@ -13,19 +14,63 @@
       <td>{{ pilot.username }}</td>
       <td>{{ pilot.email }}</td>
       <td>{{ "Yes" if pilot.is_admin else "No" }}</td>
+      <td>{{ pilot.fleet.name if pilot.fleet else "Unassigned" }}</td>
+      <td>{{ "Yes" if pilot.is_grounded else "No" }}</td>
       <td>
         <a href="{{ url_for('edit_pilot', pilot_id=pilot.id) }}">Edit</a>
+        <a href="{{ url_for('assign_pilot_fleet', pilot_id=pilot.id) }}">Assign Fleet</a>
+        <form action="{{ url_for('ground_pilot', pilot_id=pilot.id) }}" method="post" style="display:inline;">
+          <button type="submit">Ground</button>
+        </form>
+        <form action="{{ url_for('remove_pilot', pilot_id=pilot.id) }}" method="post" style="display:inline;">
+          <button type="submit">Remove</button>
+        </form>
       </td>
     </tr>
   {% endfor %}
 </table>
 
-<hr>
-<ul>
-  <li><a href="{{ url_for('fleets') }}">Manage Fleets</a></li>
-  <li><a href="{{ url_for('company_financials') }}">Manage Company Financials</a></li>
-  <li><a href="{{ url_for('company_flightlog') }}">Manage Company Flight Log</a></li>
-  <li><a href="{{ url_for('fleet_assets') }}">Manage Fleet Assets</a></li>
-  <!-- Add more admin links as needed -->
-</ul>
+<h2>Aircraft</h2>
+<a href="{{ url_for('add_aircraft') }}">Add Aircraft</a>
+<table border="1">
+  <tr>
+    <th>ID</th><th>Registration</th><th>Type</th><th>Fleet</th><th>Actions</th>
+  </tr>
+  {% for a in aircraft %}
+    <tr>
+      <td>{{ a.id }}</td>
+      <td>{{ a.registration }}</td>
+      <td>{{ a.type }}</td>
+      <td>{{ a.fleet.name if a.fleet else "Unassigned" }}</td>
+      <td>
+        <a href="{{ url_for('edit_aircraft', aircraft_id=a.id) }}">Edit</a>
+      </td>
+    </tr>
+  {% endfor %}
+</table>
+
+<h2>Fleets</h2>
+<a href="{{ url_for('add_fleet') }}">Add Fleet</a>
+<table border="1">
+  <tr>
+    <th>ID</th><th>Name</th><th>Actions</th>
+  </tr>
+  {% for fleet in fleets %}
+    <tr>
+      <td>{{ fleet.id }}</td>
+      <td>{{ fleet.name }}</td>
+      <td>
+        <a href="{{ url_for('edit_fleet', fleet_id=fleet.id) }}">Edit</a>
+      </td>
+    </tr>
+  {% endfor %}
+</table>
+
+<h2>Company Financials</h2>
+<p>
+  Balance: ${{ "%.2f"|format(financial.balance if financial else 0) }}<br>
+  Revenue: ${{ "%.2f"|format(financial.revenue if financial else 0) }}<br>
+  Expenses: ${{ "%.2f"|format(financial.expenses if financial else 0) }}<br>
+  <a href="{{ url_for('edit_company_financials') }}">Edit Financials</a>
+</p>
 {% endblock %}

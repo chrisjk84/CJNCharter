@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Edit Fleet</h1>
+<form method="post">
+    <label>Name: <input type="text" name="name" value="{{ fleet.name }}" required></label><br>
+    <input type="submit" value="Save">
+</form>
+{% endblock %}

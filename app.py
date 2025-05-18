@@ -5,7 +5,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-from models import db, Pilot, Aircraft
+from models import db, Pilot, Aircraft, Fleet, CompanyFinancial
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev_secret_key")
@@ -92,66 +92,130 @@ def logout():
     flash("You have been logged out.", "success")
     return redirect(url_for("login"))
 
-# --- Company Financials Page ---
-@app.route("/company_financials")
-@login_required
-def company_financials():
-    company = {"name": "CJX Aviation", "balance": 123456.78, "revenue": 200000.00, "expenses": 76543.22}
-    return render_template("company_financials.html", company=company)
-
-# --- Company Flight Log Page ---
-@app.route("/company_flightlog")
-@login_required
-def company_flightlog():
-    return render_template("company_flightlog.html")
-
-# --- Fleets Overview ---
-@app.route("/fleets")
-@login_required
-def fleets():
-    return render_template("fleets.html")
-
-# --- Fleet Assets ---
-@app.route("/fleet_assets")
-@login_required
-def fleet_assets():
-    return render_template("fleet_assets.html")
-
-# --- Fleet Details ---
-@app.route("/fleet_details")
-@login_required
-def fleet_details():
-    return render_template("fleet_details.html")
-
-# --- Fleet Flight Log ---
-@app.route("/fleet_flightlog")
-@login_required
-def fleet_flightlog():
-    return render_template("fleet_flightlog.html")
-
-# --- Pilots Overview ---
-@app.route("/pilots")
-@login_required
-def pilots():
-    pilots = Pilot.query.all()
-    return render_template("pilots.html", pilots=pilots)
-
-# --- Pilot Logbook ---
-@app.route("/pilot_logbook")
-@login_required
-def pilot_logbook():
-    return render_template("pilot_logbook.html")
-
 # --- Admin Dashboard ---
 @app.route("/admin")
 @login_required
 @admin_required
 def admin_dashboard():
     pilots = Pilot.query.all()
-    # Add queries for fleets, financials, etc. as needed
-    return render_template("admin_dashboard.html", pilots=pilots)
+    aircraft = Aircraft.query.all()
+    fleets = Fleet.query.all()
+    financial = CompanyFinancial.query.first()
+    return render_template("admin_dashboard.html", pilots=pilots, aircraft=aircraft, fleets=fleets, financial=financial)
 
-# --- Edit Pilot Example ---
+# --- Aircraft CRUD ---
+@app.route("/admin/aircraft/add", methods=["GET", "POST"])
+@login_required
+@admin_required
+def add_aircraft():
+    fleets = Fleet.query.all()
+    if request.method == "POST":
+        registration = request.form["registration"]
+        type_ = request.form["type"]
+        fleet_id = request.form.get("fleet_id") or None
+        aircraft = Aircraft(registration=registration, type=type_, fleet_id=fleet_id)
+        db.session.add(aircraft)
+        db.session.commit()
+        flash("Aircraft added!", "success")
+        return redirect(url_for("admin_dashboard"))
+    return render_template("add_aircraft.html", fleets=fleets)
+
+@app.route("/admin/aircraft/<int:aircraft_id>/edit", methods=["GET", "POST"])
+@login_required
+@admin_required
+def edit_aircraft(aircraft_id):
+    aircraft = Aircraft.query.get_or_404(aircraft_id)
+    fleets = Fleet.query.all()
+    if request.method == "POST":
+        aircraft.registration = request.form["registration"]
+        aircraft.type = request.form["type"]
+        aircraft.fleet_id = request.form.get("fleet_id") or None
+        db.session.commit()
+        flash("Aircraft updated!", "success")
+        return redirect(url_for("admin_dashboard"))
+    return render_template("edit_aircraft.html", aircraft=aircraft, fleets=fleets)
+
+# --- Fleet CRUD ---
+@app.route("/admin/fleet/add", methods=["GET", "POST"])
+@login_required
+@admin_required
+def add_fleet():
+    if request.method == "POST":
+        name = request.form["name"]
+        fleet = Fleet(name=name)
+        db.session.add(fleet)
+        db.session.commit()
+        flash("Fleet added!", "success")
+        return redirect(url_for("admin_dashboard"))
+    return render_template("add_fleet.html")
+
+@app.route("/admin/fleet/<int:fleet_id>/edit", methods=["GET", "POST"])
+@login_required
+@admin_required
+def edit_fleet(fleet_id):
+    fleet = Fleet.query.get_or_404(fleet_id)
+    if request.method == "POST":
+        fleet.name = request.form["name"]
+        db.session.commit()
+        flash("Fleet updated!", "success")
+        return redirect(url_for("admin_dashboard"))
+    return render_template("edit_fleet.html", fleet=fleet)
+
+# --- Assign Pilot to Fleet ---
+@app.route("/admin/pilot/<int:pilot_id>/assign_fleet", methods=["GET", "POST"])
+@login_required
+@admin_required
+def assign_pilot_fleet(pilot_id):
+    pilot = Pilot.query.get_or_404(pilot_id)
+    fleets = Fleet.query.all()
+    if request.method == "POST":
+        pilot.fleet_id = request.form.get("fleet_id") or None
+        db.session.commit()
+        flash("Pilot assigned to fleet!", "success")
+        return redirect(url_for("admin_dashboard"))
+    return render_template("assign_pilot_fleet.html", pilot=pilot, fleets=fleets)
+
+# --- Remove or Ground Pilot ---
+@app.route("/admin/pilot/<int:pilot_id>/ground", methods=["POST"])
+@login_required
+@admin_required
+def ground_pilot(pilot_id):
+    pilot = Pilot.query.get_or_404(pilot_id)
+    pilot.is_grounded = True
+    db.session.commit()
+    flash("Pilot grounded.", "success")
+    return redirect(url_for("admin_dashboard"))
+
+@app.route("/admin/pilot/<int:pilot_id>/remove", methods=["POST"])
+@login_required
+@admin_required
+def remove_pilot(pilot_id):
+    pilot = Pilot.query.get_or_404(pilot_id)
+    db.session.delete(pilot)
+    db.session.commit()
+    flash("Pilot removed.", "success")
+    return redirect(url_for("admin_dashboard"))
+
+# --- Edit Company Financials ---
+@app.route("/admin/company_financials/edit", methods=["GET", "POST"])
+@login_required
+@admin_required
+def edit_company_financials():
+    financial = CompanyFinancial.query.first()
+    if not financial:
+        financial = CompanyFinancial()
+        db.session.add(financial)
+        db.session.commit()
+    if request.method == "POST":
+        financial.balance = float(request.form["balance"])
+        financial.revenue = float(request.form["revenue"])
+        financial.expenses = float(request.form["expenses"])
+        db.session.commit()
+        flash("Company financials updated.", "success")
+        return redirect(url_for("admin_dashboard"))
+    return render_template("edit_company_financials.html", financial=financial)
+
+# --- Edit Pilot (username/email/is_admin) ---
 @app.route("/admin/pilot/<int:pilot_id>/edit", methods=["GET", "POST"])
 @login_required
 @admin_required
@@ -166,12 +230,10 @@ def edit_pilot(pilot_id):
         return redirect(url_for("admin_dashboard"))
     return render_template("edit_pilot.html", pilot=pilot)
 
-# --- Error Handler for 404 ---
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
 
-# Only run db.create_all() for local development
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
