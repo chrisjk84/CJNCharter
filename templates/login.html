@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Pilot Login - CJX Aviation Network</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { background: #23272a; color: #e0e0e0; font-family: 'Segoe UI', Arial, sans-serif; }
+        .login-container {
+            max-width: 350px;
+            margin: 8vw auto;
+            background: #141414;
+            border-radius: 10px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.32);
+            padding: 2.5rem 2rem;
+        }
+        h1 { text-align: center; color: #fff; }
+        label { display: block; margin-top: 1.2em; }
+        input[type="text"], input[type="password"] {
+            width: 100%; padding: 0.7em 1em; margin-top: 0.2em;
+            border-radius: 6px; border: 1px solid #6c757d;
+            background: #23272a; color: #e0e0e0; font-size: 1.05em;
+        }
+        .login-btn {
+            width: 100%; margin-top: 2em; padding: 0.9em;
+            background: #6c757d; color: #fff; border: none;
+            border-radius: 6px; font-size: 1.1em; font-weight: bold; cursor: pointer;
+            transition: background 0.2s;
+        }
+        .login-btn:hover { background: #4682b4; color: #fff; }
+        .register-link { display: block; text-align: center; margin-top: 1.5em; }
+        .error { color: #ff6b6b; text-align: center; margin-top: 1em; }
+        .success { color: #7fff7f; text-align: center; margin-top: 1em; }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>CJX Pilot Login</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <form method="POST" action="{{ url_for('login') }}">
+            <label for="username">Username or Email:</label>
+            <input type="text" id="username" name="username" required autofocus>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <button class="login-btn" type="submit">Login</button>
+        </form>
+        <div class="register-link">
+            New pilot? <a href="{{ url_for('register') }}">Register here</a>
+        </div>
+    </div>
+</body>
+</html>
