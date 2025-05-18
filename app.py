@@ -123,7 +123,7 @@ def find_destinations(dep_icao, min_dist, max_dist, min_rwy_len, surfaces, max_p
 def fetch_avwx_metar(icao):
     key = AVWX_API_KEY
     if not key or not icao or len(icao) != 4 or not icao.isalpha():
-        return "No API key or valid ICAO code."
+        return "No current METAR available"
     url = f"https://avwx.rest/api/metar/{icao}"
     headers = {
         "Authorization": key,
@@ -173,7 +173,7 @@ def add_icao_field(airport):
 
 def generate_openai_scenario(dep, dest, distance_nm, dep_metar, dest_metar, dest_taf, pax):
     prompt = (
-        f"Write a short realistic scenario for a charter flight. "
+        f"Write a realistic scenario for a charter flight. Write the scenario in present tense. "
         f"from {dep['name']} ({dep['icao']}) to {dest['name']} ({dest['icao']}). The distance is {int(distance_nm)} nautical miles. "
         f"Departure airport METAR: {dep_metar}. Destination airport METAR: {dest_metar}. Destination TAF: {dest_taf}. You have {pax} passengers. "
         "Focus on the reason for the trip and the passenger background. "
