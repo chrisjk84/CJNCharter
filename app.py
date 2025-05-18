@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 AIRPORTS_CSV = os.path.join("data", "airports.csv")
 RUNWAYS_CSV = os.path.join("data", "runways.csv")
-AIRCRAFT_CSV = os.path.join("data", "aircraft.csv")  # Updated to match your file location
+AIRCRAFT_CSV = os.path.join("data", "aircraft.csv")
 
 client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 AVWX_API_KEY = os.getenv("AVWX_API_KEY")
@@ -37,7 +37,7 @@ def load_aircraft():
                         'name': name,
                         'icao_code': row['ICAO Code'],
                         'max_passengers': int(row['Max Passengers']),
-                        'min_landing_distance': int(row['Min Landing Distance (ft)']),
+                        'min_landing_distance': int(row['Max Landing Distance (ft)']),
                         'max_range': int(row['Max Range (nm)'])
                     })
         except Exception as e:
@@ -173,12 +173,12 @@ def add_icao_field(airport):
 
 def generate_openai_scenario(dep, dest, distance_nm, dep_metar, dest_metar, dest_taf, pax):
     prompt = (
-        f"Write a single-paragraph, immersive, and realistic scenario for a virtual charter flight "
+        f"Write a realistic scenario for a charter flight. Write the scenario in present tense. "
         f"from {dep['name']} ({dep['icao']}) to {dest['name']} ({dest['icao']}). The distance is {int(distance_nm)} nautical miles. "
         f"Departure airport METAR: {dep_metar}. Destination airport METAR: {dest_metar}. Destination TAF: {dest_taf}. You have {pax} passengers. "
         "Focus on the reason for the trip and the passenger background. "
         "Only mention weather at departure or destination if it is notable or will directly affect the flight. "
-        "Do NOT invent in-flight emergencies, do NOT discuss enroute weather unless the real METAR/TAF suggests it, and do NOT continue past the first paragraph."
+        "Do NOT invent in-flight emergencies, do NOT discuss enroute weather unless the real METAR/TAF suggests it. "
     )
     try:
         response = client.chat.completions.create(
@@ -217,6 +217,7 @@ def index():
     aircraft_list = load_aircraft()
     user_input = {
         "departure_icao": "",
+        "destination_icao": "",
         "min_distance": "50",
         "max_distance": "500",
         "min_runway_length": "2000",
@@ -228,6 +229,7 @@ def index():
     if request.method == 'POST':
         try:
             dep_icao = request.form['departure_icao'].strip().upper()
+            destination_icao = request.form.get('destination_icao', '').strip().upper()
             min_dist = float(request.form['min_distance'])
             max_dist = float(request.form['max_distance'])
             min_rwy_len = int(request.form['min_runway_length'])
@@ -237,6 +239,7 @@ def index():
             aircraft_selected = request.form.get('aircraft_selected', '').strip()
             user_input.update({
                 "departure_icao": dep_icao,
+                "destination_icao": destination_icao,
                 "min_distance": str(min_dist),
                 "max_distance": str(max_dist),
                 "min_runway_length": str(min_rwy_len),
@@ -260,7 +263,64 @@ def index():
                 error = "Departure ICAO is required."
             elif not surfaces:
                 error = "Please select at least one runway surface type."
+            elif destination_icao:
+                # User provided a destination
+                if dep_icao == destination_icao:
+                    error = "Departure and destination ICAO cannot be the same."
+                else:
+                    airports = load_airports()
+                    dep_airport = get_airport_by_icao(airports, dep_icao)
+                    dest_full = get_airport_by_icao(airports, destination_icao)
+                    if not dep_airport:
+                        error = f"Departure ICAO {dep_icao} not found."
+                    elif not dest_full:
+                        error = f"Destination ICAO {destination_icao} not found."
+                    else:
+                        # Optionally check if destination matches runway/surface/min_dist/max_dist filters
+                        dep_lat = float(dep_airport["latitude_deg"])
+                        dep_lon = float(dep_airport["longitude_deg"])
+                        dest_lat = float(dest_full["latitude_deg"])
+                        dest_lon = float(dest_full["longitude_deg"])
+                        distance = haversine(dep_lat, dep_lon, dest_lat, dest_lon)
+                        # Check range
+                        if distance < min_dist or distance > max_dist:
+                            error = f"Destination is {int(distance)}nm away, outside your selected distance range."
+                        else:
+                            # Check runway
+                            runways = load_runways()
+                            rwylist = [r for r in runways if r["airport_ref"] == dest_full["id"] and
+                                       int(r["length_ft"] or 0) >= min_rwy_len and
+                                       any(s in (r["surface"] or "").lower() for s in surfaces)]
+                            if not rwylist:
+                                error = "Selected destination does not have a suitable runway."
+                            else:
+                                add_icao_field(dep_airport)
+                                add_icao_field(dest_full)
+                                dep_metar = fetch_avwx_metar(dep_airport["icao"])
+                                dest_metar = fetch_avwx_metar(dest_full["icao"])
+                                dest_taf = fetch_avwx_taf(dest_full["icao"])
+                                weather_brief_dep = dep_metar
+                                weather_brief_dest = f"METAR: {dest_metar}\nTAF: {dest_taf}"
+                                scenario = generate_openai_scenario(dep_airport, dest_full, distance, dep_metar, dest_metar, dest_taf, max_pax)
+                                random_scenario = scenario
+                                airport_info = {
+                                    "icao": dest_full["icao"],
+                                    "name": dest_full["name"],
+                                    "location": f"{dest_full.get('municipality','')}, {dest_full.get('iso_region','')}",
+                                    "elevation": dest_full.get("elevation_ft", ""),
+                                    "runway": "See below"
+                                }
+                                if rwylist:
+                                    best_rwy = sorted(rwylist, key=lambda x: -int(x["length_ft"] or 0))[0]
+                                    airport_info["runway"] = (
+                                        f"{best_rwy['ident']}: {best_rwy['length_ft']} ft, {best_rwy['surface']}"
+                                    )
+                                else:
+                                    airport_info["runway"] = "No suitable runway found."
+                                # Fetch route from Flight Plan Database
+                                route_string = fetch_fpdb_route(dep_airport["icao"], dest_full["icao"])
             else:
+                # Old random destination logic as before
                 results = find_destinations(dep_icao, min_dist, max_dist, min_rwy_len, surfaces, max_pax)
                 if not results:
                     error = "No results found with the current filters."

@@ -291,7 +291,7 @@
             <img src="{{ url_for('static', filename='CJX-Aviation-Network-logo.png') }}" alt="CJX Aviation Network Logo" class="cjx-logo-img">
             <span class="cjx-tagline">Pilot Dispatch Portal &mdash; Homebase: New Orleans, Worldwide Service</span>
         </div>
-        <div class="cjx-version">V0.2.4b</div>
+        <div class="cjx-version">V0.2.5b</div>
     </div>
     <div class="cjx-content">
         <div class="cjx-section-title">Flight Request Form</div>
@@ -316,6 +316,13 @@
                     <label>Departure ICAO:</label>
                     <input type="text" name="departure_icao" maxlength="4" required
                         value="{{ user_input.departure_icao }}"
+                        style="text-transform:uppercase;"
+                        class="cjx-input">
+                </div>
+                <div>
+                    <label>Destination ICAO <span style="font-weight:normal; font-size:0.95em;">(optional)</span>:</label>
+                    <input type="text" name="destination_icao" maxlength="4"
+                        value="{{ user_input.destination_icao }}"
                         style="text-transform:uppercase;"
                         class="cjx-input">
                 </div>
