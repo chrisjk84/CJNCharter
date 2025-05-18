@@ -78,6 +78,13 @@ def company_financials():
     # For now, just render the template
     return render_template("company_financials.html")
 
+# --- NEW PAGE: Company Flight Log ---
+@app.route("/company_flightlog")
+@login_required
+def company_flightlog():
+    # Example: get flight log data here if available
+    return render_template("company_flightlog.html")
+
 # Only run db.create_all() for local development
 if __name__ == "__main__":
     with app.app_context():
