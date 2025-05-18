@@ -64,7 +64,7 @@
             pointer-events: none;
         }
         .cjx-content {
-            max-width: 650px;
+            max-width: 700px;
             margin: 2rem auto;
             background: var(--cjx-darkgray);
             border-radius: 12px;
@@ -77,37 +77,46 @@
             margin-bottom: 1.2rem;
             color: var(--cjx-white);
             letter-spacing: 0.5px;
+            text-align: center;
         }
         form {
             display: flex;
             flex-direction: column;
-            gap: 1.1rem;
+            align-items: center;
+            width: 100%;
         }
         label {
             font-weight: 600;
             display: block;
             margin-bottom: 0.3rem;
             color: var(--cjx-lightgray);
+            text-align: center;
         }
         .cjx-row {
             display: flex;
             flex-wrap: wrap;
             gap: 2rem;
             margin-bottom: 1.5rem;
+            justify-content: center;
+            width: 100%;
         }
         .cjx-row > div {
             flex: 1 1 213px;
             min-width: 213px;
             max-width: 213px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .cjx-input {
             width: 100%;
+            max-width: 220px;
             padding: 0.87rem 1.12rem;
             border: 1px solid var(--cjx-accent);
             border-radius: 6px;
             background: var(--cjx-black);
             color: var(--cjx-lightgray);
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             margin-top: 0.2rem;
             box-sizing: border-box;
             font-weight: bold;
@@ -152,6 +161,7 @@
             border-radius: 6px;
             margin-top: 0.5em;
             font-weight: 600;
+            text-align: center;
         }
         .cjx-dispatch-sheet {
             margin-top: 2.5rem;
@@ -237,6 +247,14 @@
             color: var(--cjx-white);
             text-decoration: underline;
         }
+        .cjx-helper-text {
+            font-size: 0.78em;
+            color: #bbbbbb;
+            margin-bottom: 3em;
+            margin-top: 1em;
+            text-align: center;
+	    font-weight: bold;
+        }
         @media (max-width: 700px) {
             .cjx-header {
                 flex-direction: column;
@@ -255,6 +273,7 @@
             .cjx-row {
                 flex-direction: column;
                 gap: 1rem;
+                align-items: center;
             }
             .cjx-row > div {
                 max-width: 100%;
@@ -278,7 +297,7 @@
         <div class="cjx-section-title">Flight Request Form</div>
         <form method="POST" id="dispatch-form">
             <label for="aircraft_select">Select Aircraft:</label>
-            <select id="aircraft_select" class="cjx-input">
+            <select id="aircraft_select" class="cjx-input" name="aircraft_selected" style="max-width:350px;">
                 <option value="">-- Select Aircraft --</option>
                 {% for a in aircraft_list %}
                   <option value="{{ a.name }}"
@@ -289,6 +308,9 @@
                   </option>
                 {% endfor %}
             </select>
+            <div class="cjx-helper-text">
+                Selecting aircraft auto populates fields below, but they can be changed if needed.
+            </div>
             <div class="cjx-row">
                 <div>
                     <label>Departure ICAO:</label>
@@ -311,14 +333,14 @@
                 </div>
                 <div>
                     <label>Max Passengers:</label>
-                    <input type="number" name="max_passengers" value="{{ user_input.max_passengers }}" min="1" max="50" required class="cjx-input">
+                    <input type="number" name="max_passengers" value="{{ user_input.max_passengers }}" min="1" max="300" required class="cjx-input">
                 </div>
                 <div>
                     <label>Max Range (nm):</label>
                     <input type="number" name="max_range" value="{{ user_input.max_range if user_input.max_range is defined else '' }}" min="1" class="cjx-input" readonly>
                 </div>
             </div>
-            <div class="cjx-checkbox-group">
+            <div class="cjx-checkbox-group" style="text-align:center;">
                 <label>Runway Surface:</label><br>
                 <label><input type="checkbox" name="surface" value="turf" {% if 'turf' in user_input.surface %}checked{% endif %}>Grass/Turf</label>
                 <label><input type="checkbox" name="surface" value="asph" {% if 'asph' in user_input.surface %}checked{% endif %}>Asphalt</label>
