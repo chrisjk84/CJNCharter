@@ -1,10 +1,11 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, Pilot, Aircraft  # Add other models as needed
+from functools import wraps
+from models import db, Pilot, Aircraft
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev_secret_key")
@@ -21,6 +22,27 @@ login_manager.login_view = "login"
 @login_manager.user_loader
 def load_user(user_id):
     return Pilot.query.get(int(user_id))
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not getattr(current_user, "is_admin", False):
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.before_request
+def create_admin():
+    admin = Pilot.query.filter_by(username="admin").first()
+    if not admin:
+        admin = Pilot(
+            username="admin",
+            email="admin@company.com",
+            password_hash=generate_password_hash("password"),
+            is_admin=True
+        )
+        db.session.add(admin)
+        db.session.commit()
 
 @app.route('/')
 @login_required
@@ -74,15 +96,13 @@ def logout():
 @app.route("/company_financials")
 @login_required
 def company_financials():
-    # Example: get data, e.g. CompanyFinancialLog.query.all()
-    # For now, just render the template
-    return render_template("company_financials.html")
+    company = {"name": "CJX Aviation", "balance": 123456.78, "revenue": 200000.00, "expenses": 76543.22}
+    return render_template("company_financials.html", company=company)
 
 # --- Company Flight Log Page ---
 @app.route("/company_flightlog")
 @login_required
 def company_flightlog():
-    # Example: get flight log data here if available
     return render_template("company_flightlog.html")
 
 # --- Fleets Overview ---
@@ -113,13 +133,38 @@ def fleet_flightlog():
 @app.route("/pilots")
 @login_required
 def pilots():
-    return render_template("pilots.html")
+    pilots = Pilot.query.all()
+    return render_template("pilots.html", pilots=pilots)
 
 # --- Pilot Logbook ---
 @app.route("/pilot_logbook")
 @login_required
 def pilot_logbook():
     return render_template("pilot_logbook.html")
+
+# --- Admin Dashboard ---
+@app.route("/admin")
+@login_required
+@admin_required
+def admin_dashboard():
+    pilots = Pilot.query.all()
+    # Add queries for fleets, financials, etc. as needed
+    return render_template("admin_dashboard.html", pilots=pilots)
+
+# --- Edit Pilot Example ---
+@app.route("/admin/pilot/<int:pilot_id>/edit", methods=["GET", "POST"])
+@login_required
+@admin_required
+def edit_pilot(pilot_id):
+    pilot = Pilot.query.get_or_404(pilot_id)
+    if request.method == "POST":
+        pilot.username = request.form["username"]
+        pilot.email = request.form["email"]
+        pilot.is_admin = "is_admin" in request.form
+        db.session.commit()
+        flash("Pilot updated!", "success")
+        return redirect(url_for("admin_dashboard"))
+    return render_template("edit_pilot.html", pilot=pilot)
 
 # --- Error Handler for 404 ---
 @app.errorhandler(404)
