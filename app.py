@@ -173,12 +173,12 @@ def add_icao_field(airport):
 
 def generate_openai_scenario(dep, dest, distance_nm, dep_metar, dest_metar, dest_taf, pax):
     prompt = (
-        f"Write a single-paragraph, immersive, and realistic scenario for a virtual charter flight "
+        f"Write a short realistic scenario for a charter flight. "
         f"from {dep['name']} ({dep['icao']}) to {dest['name']} ({dest['icao']}). The distance is {int(distance_nm)} nautical miles. "
         f"Departure airport METAR: {dep_metar}. Destination airport METAR: {dest_metar}. Destination TAF: {dest_taf}. You have {pax} passengers. "
         "Focus on the reason for the trip and the passenger background. "
         "Only mention weather at departure or destination if it is notable or will directly affect the flight. "
-        "Do NOT invent in-flight emergencies, do NOT discuss enroute weather unless the real METAR/TAF suggests it, and do NOT continue past the first paragraph."
+        "Do NOT invent in-flight emergencies, do NOT discuss enroute weather unless the real METAR/TAF suggests it. "
     )
     try:
         response = client.chat.completions.create(
