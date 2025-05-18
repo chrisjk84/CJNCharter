@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>CJN Charter</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <nav>
@@ -19,11 +20,11 @@
     <hr>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-        <ul>
+        <div class="flash">
         {% for category, message in messages %}
-          <li><strong>{{ category.capitalize() }}:</strong> {{ message }}</li>
+          <strong>{{ category.capitalize() }}:</strong> {{ message }}<br>
         {% endfor %}
-        </ul>
+        </div>
       {% endif %}
     {% endwith %}
     {% block content %}{% endblock %}
