@@ -2,9 +2,9 @@ import os
 import csv
 import math
 import random
-import requests # type: ignore
+import requests
 import openai
-from flask import Flask, render_template, request # type: ignore
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
@@ -37,7 +37,7 @@ def load_aircraft():
                         'name': name,
                         'icao_code': row['ICAO Code'],
                         'max_passengers': int(row['Max Passengers']),
-                        'min_landing_distance': int(row['Min Takeoff Distance (ft)']),
+                        'min_landing_distance': int(row['Min Landing Distance (ft)']),
                         'max_range': int(row['Max Range (nm)'])
                     })
         except Exception as e:
@@ -123,7 +123,7 @@ def find_destinations(dep_icao, min_dist, max_dist, min_rwy_len, surfaces, max_p
 def fetch_avwx_metar(icao):
     key = AVWX_API_KEY
     if not key or not icao or len(icao) != 4 or not icao.isalpha():
-        return "No current METAR available"
+        return "No API key or valid ICAO code."
     url = f"https://avwx.rest/api/metar/{icao}"
     headers = {
         "Authorization": key,
@@ -173,12 +173,12 @@ def add_icao_field(airport):
 
 def generate_openai_scenario(dep, dest, distance_nm, dep_metar, dest_metar, dest_taf, pax):
     prompt = (
-        f"Write a realistic scenario for a charter flight. Write the scenario in present tense. "
+        f"Write a single-paragraph, immersive, and realistic scenario for a virtual charter flight "
         f"from {dep['name']} ({dep['icao']}) to {dest['name']} ({dest['icao']}). The distance is {int(distance_nm)} nautical miles. "
         f"Departure airport METAR: {dep_metar}. Destination airport METAR: {dest_metar}. Destination TAF: {dest_taf}. You have {pax} passengers. "
         "Focus on the reason for the trip and the passenger background. "
         "Only mention weather at departure or destination if it is notable or will directly affect the flight. "
-        "Do NOT invent in-flight emergencies, do NOT discuss enroute weather unless the real METAR/TAF suggests it. "
+        "Do NOT invent in-flight emergencies, do NOT discuss enroute weather unless the real METAR/TAF suggests it, and do NOT continue past the first paragraph."
     )
     try:
         response = client.chat.completions.create(
@@ -191,6 +191,21 @@ def generate_openai_scenario(dep, dest, distance_nm, dep_metar, dest_metar, dest
     except Exception as e:
         return f"OpenAI error: {e}"
 
+def fetch_fpdb_route(dep_icao, dest_icao):
+    try:
+        url = f"https://api.flightplandatabase.com/nav/route/{dep_icao}/{dest_icao}"
+        resp = requests.get(url, timeout=8)
+        if resp.ok:
+            data = resp.json()
+            if "route" in data:
+                return data["route"]
+            else:
+                return f"No route found between {dep_icao} and {dest_icao}."
+        else:
+            return f"API error: {resp.status_code}"
+    except Exception as e:
+        return f"Route generation error: {e}"
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     error = ""
@@ -198,7 +213,7 @@ def index():
     weather_brief_dep = None
     weather_brief_dest = None
     airport_info = None
-    results = []
+    route_string = None
     aircraft_list = load_aircraft()
     user_input = {
         "departure_icao": "",
@@ -289,6 +304,8 @@ def index():
                         )
                     else:
                         airport_info["runway"] = "No suitable runway found."
+                    # Fetch route from Flight Plan Database
+                    route_string = fetch_fpdb_route(dep_airport["icao"], dest_full["icao"])
         except Exception as e:
             error = f"Error: {e}"
     return render_template(
@@ -299,7 +316,8 @@ def index():
         weather_brief_dep=weather_brief_dep,
         weather_brief_dest=weather_brief_dest,
         airport_info=airport_info,
-        aircraft_list=aircraft_list
+        aircraft_list=aircraft_list,
+        route_string=route_string
     )
 
 @app.route('/changelog')
