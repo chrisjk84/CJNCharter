@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Fleet List</h1>
+{% if is_admin %}
+  <a href="{{ url_for('add_fleet') }}">Add Fleet</a>
+{% endif %}
+<table border="1">
+  <tr>
+    <th>ID</th><th>Name</th>
+    {% if is_admin or current_user.fleet_id %}
+      <th>Actions</th>
+    {% endif %}
+  </tr>
+  {% for fleet in fleets %}
+    <tr>
+      <td>{{ fleet.id }}</td>
+      <td>{{ fleet.name }}</td>
+      {% if is_admin or current_user.fleet_id == fleet.id %}
+        <td><a href="{{ url_for('edit_fleet', fleet_id=fleet.id) }}">Edit</a></td>
+      {% endif %}
+    </tr>
+  {% endfor %}
+</table>
+{% endblock %}

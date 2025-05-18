@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Aircraft List</h1>
+{% if is_admin %}
+  <a href="{{ url_for('add_aircraft') }}">Add Aircraft</a>
+{% endif %}
+<table border="1">
+  <tr>
+    <th>ID</th><th>Registration</th><th>Type</th><th>Fleet</th>
+    {% if is_admin %}<th>Actions</th>{% endif %}
+  </tr>
+  {% for a in aircraft %}
+    <tr>
+      <td>{{ a.id }}</td>
+      <td>{{ a.registration }}</td>
+      <td>{{ a.type }}</td>
+      <td>{{ a.fleet.name if a.fleet else "Unassigned" }}</td>
+      {% if is_admin %}
+        <td><a href="{{ url_for('edit_aircraft', aircraft_id=a.id) }}">Edit</a></td>
+      {% endif %}
+    </tr>
+  {% endfor %}
+</table>
+{% endblock %}

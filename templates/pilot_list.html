@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Pilot List</h1>
+<table border="1">
+  <tr>
+    <th>ID</th><th>Username</th><th>Email</th><th>Admin?</th><th>Fleet</th><th>Grounded?</th>
+    <th>Actions</th>
+  </tr>
+  {% for pilot in pilots %}
+    <tr>
+      <td>{{ pilot.id }}</td>
+      <td>{{ pilot.username }}</td>
+      <td>{{ pilot.email }}</td>
+      <td>{{ "Yes" if pilot.is_admin else "No" }}</td>
+      <td>{{ pilot.fleet.name if pilot.fleet else "Unassigned" }}</td>
+      <td>{{ "Yes" if pilot.is_grounded else "No" }}</td>
+      <td>
+        {% if is_admin or current_user.id == pilot.id %}
+          <a href="{{ url_for('edit_pilot', pilot_id=pilot.id) }}">Edit</a>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+</table>
+{% endblock %}

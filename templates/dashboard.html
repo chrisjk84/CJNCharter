@@ -1,17 +1,7 @@
 {% extends "base.html" %}
-{% block title %}Dashboard - CJX Aviation{% endblock %}
 {% block content %}
-<h1>Welcome, {{ pilot.username }}!</h1>
-<p>Your fleet(s):</p>
-<ul>
-    {% for fleet in pilot.fleets %}
-        <li>
-            <a href="{{ url_for('fleet_detail', fleet_id=fleet.id) }}">{{ fleet.name }}</a>
-            (Balance: ${{ "%.2f"|format(fleet.balance) }})
-        </li>
-    {% endfor %}
-</ul>
-<p>
-    <a href="{{ url_for('pilot_logbook', pilot_id=pilot.id) }}">Your Logbook</a>
-</p>
+<h1>Welcome, {{ pilot.username }}</h1>
+<p>Your email: {{ pilot.email }}</p>
+<p>Your fleet: {{ pilot.fleet.name if pilot.fleet else "Unassigned" }}</p>
+<p>Your role: {{ "Admin" if pilot.is_admin else "Pilot" }}</p>
 {% endblock %}

@@ -1,44 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>{% block title %}CJX Aviation{% endblock %}</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        body { background: #23272a; color: #e0e0e0; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; }
-        a, a:visited { color: #e0e0e0; text-decoration: underline; }
-        a:hover, a:active { color: #7fff7f; text-decoration: underline; }
-        .container { max-width: 900px; margin: 5vw auto; background: #141414; border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.32); padding: 2.5rem 2.5rem; }
-        .navbar { background: #181818; padding: 1em 2em; border-radius: 0 0 10px 10px; }
-        .navbar a { margin-right: 1.5em; font-weight: bold; }
-        h1, h2, h3 { color: #fff; }
-        table { width: 100%; border-collapse: collapse; margin: 2em 0; }
-        th, td { padding: 0.7em; border: 1px solid #444; text-align: left; }
-        th { background: #222; }
-        tr:nth-child(even) { background: #1b1b1b; }
-        .success { color: #7fff7f; }
-        .error { color: #ff6b6b; }
-    </style>
-    {% block head %}{% endblock %}
+    <title>CJN Charter</title>
 </head>
 <body>
-    <div class="navbar">
-        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+    <nav>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a> |
+        <a href="{{ url_for('list_pilots') }}">Pilots</a> |
+        <a href="{{ url_for('list_aircraft') }}">Aircraft</a> |
+        <a href="{{ url_for('list_fleets') }}">Fleets</a> |
         <a href="{{ url_for('company_financials') }}">Company Financials</a>
-        <a href="{{ url_for('company_flightlog') }}">Company Flight Log</a>
-        <a href="{{ url_for('fleets') }}">Fleets</a>
-        <a href="{{ url_for('pilots') }}">Pilots</a>
-        <a href="{{ url_for('logout') }}">Logout</a>
-    </div>
-    <div class="container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        {% block content %}{% endblock %}
-    </div>
+        {% if is_admin %}
+            | <a href="{{ url_for('admin_dashboard') }}">Admin</a>
+        {% endif %}
+        | <a href="{{ url_for('logout') }}">Logout</a>
+    </nav>
+    <hr>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul>
+        {% for category, message in messages %}
+          <li><strong>{{ category.capitalize() }}:</strong> {{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
 </body>
 </html>

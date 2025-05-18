@@ -4,11 +4,13 @@
 <form method="post">
     <label>Username: <input type="text" name="username" value="{{ pilot.username }}" required></label><br>
     <label>Email: <input type="email" name="email" value="{{ pilot.email }}" required></label><br>
-    <label>
-        <input type="checkbox" name="is_admin" {% if pilot.is_admin %}checked{% endif %}>
-        Admin
-    </label><br>
+    {% if is_admin %}
+        <label>
+            <input type="checkbox" name="is_admin" {% if pilot.is_admin %}checked{% endif %}>
+            Admin
+        </label><br>
+    {% endif %}
     <input type="submit" value="Save">
 </form>
-<a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a>
+<a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
 {% endblock %}

@@ -47,7 +47,8 @@ def create_admin():
 @app.route('/')
 @login_required
 def dashboard():
-    return render_template('dashboard.html', pilot=current_user)
+    is_admin = current_user.is_admin
+    return render_template('dashboard.html', pilot=current_user, is_admin=is_admin)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -104,6 +105,13 @@ def admin_dashboard():
     return render_template("admin_dashboard.html", pilots=pilots, aircraft=aircraft, fleets=fleets, financial=financial)
 
 # --- Aircraft CRUD ---
+@app.route("/aircraft")
+@login_required
+def list_aircraft():
+    aircraft = Aircraft.query.all()
+    is_admin = current_user.is_admin
+    return render_template("aircraft_list.html", aircraft=aircraft, is_admin=is_admin)
+
 @app.route("/admin/aircraft/add", methods=["GET", "POST"])
 @login_required
 @admin_required
@@ -117,14 +125,16 @@ def add_aircraft():
         db.session.add(aircraft)
         db.session.commit()
         flash("Aircraft added!", "success")
-        return redirect(url_for("admin_dashboard"))
+        return redirect(url_for("list_aircraft"))
     return render_template("add_aircraft.html", fleets=fleets)
 
-@app.route("/admin/aircraft/<int:aircraft_id>/edit", methods=["GET", "POST"])
+@app.route("/aircraft/<int:aircraft_id>/edit", methods=["GET", "POST"])
 @login_required
-@admin_required
 def edit_aircraft(aircraft_id):
     aircraft = Aircraft.query.get_or_404(aircraft_id)
+    is_admin = current_user.is_admin
+    if not is_admin:
+        abort(403)
     fleets = Fleet.query.all()
     if request.method == "POST":
         aircraft.registration = request.form["registration"]
@@ -132,10 +142,17 @@ def edit_aircraft(aircraft_id):
         aircraft.fleet_id = request.form.get("fleet_id") or None
         db.session.commit()
         flash("Aircraft updated!", "success")
-        return redirect(url_for("admin_dashboard"))
-    return render_template("edit_aircraft.html", aircraft=aircraft, fleets=fleets)
+        return redirect(url_for("list_aircraft"))
+    return render_template("edit_aircraft.html", aircraft=aircraft, fleets=fleets, is_admin=is_admin)
 
 # --- Fleet CRUD ---
+@app.route("/fleets")
+@login_required
+def list_fleets():
+    fleets = Fleet.query.all()
+    is_admin = current_user.is_admin
+    return render_template("fleet_list.html", fleets=fleets, is_admin=is_admin)
+
 @app.route("/admin/fleet/add", methods=["GET", "POST"])
 @login_required
 @admin_required
@@ -146,22 +163,25 @@ def add_fleet():
         db.session.add(fleet)
         db.session.commit()
         flash("Fleet added!", "success")
-        return redirect(url_for("admin_dashboard"))
+        return redirect(url_for("list_fleets"))
     return render_template("add_fleet.html")
 
-@app.route("/admin/fleet/<int:fleet_id>/edit", methods=["GET", "POST"])
+@app.route("/fleet/<int:fleet_id>/edit", methods=["GET", "POST"])
 @login_required
-@admin_required
 def edit_fleet(fleet_id):
     fleet = Fleet.query.get_or_404(fleet_id)
+    is_admin = current_user.is_admin
+    # Only allow if admin or pilot is assigned to this fleet
+    if not is_admin and current_user.fleet_id != fleet_id:
+        abort(403)
     if request.method == "POST":
         fleet.name = request.form["name"]
         db.session.commit()
         flash("Fleet updated!", "success")
-        return redirect(url_for("admin_dashboard"))
-    return render_template("edit_fleet.html", fleet=fleet)
+        return redirect(url_for("list_fleets"))
+    return render_template("edit_fleet.html", fleet=fleet, is_admin=is_admin)
 
-# --- Assign Pilot to Fleet ---
+# --- Assign Pilot to Fleet (admin only) ---
 @app.route("/admin/pilot/<int:pilot_id>/assign_fleet", methods=["GET", "POST"])
 @login_required
 @admin_required
@@ -175,7 +195,7 @@ def assign_pilot_fleet(pilot_id):
         return redirect(url_for("admin_dashboard"))
     return render_template("assign_pilot_fleet.html", pilot=pilot, fleets=fleets)
 
-# --- Remove or Ground Pilot ---
+# --- Remove or Ground Pilot (admin only) ---
 @app.route("/admin/pilot/<int:pilot_id>/ground", methods=["POST"])
 @login_required
 @admin_required
@@ -196,11 +216,48 @@ def remove_pilot(pilot_id):
     flash("Pilot removed.", "success")
     return redirect(url_for("admin_dashboard"))
 
-# --- Edit Company Financials ---
+# --- Pilot CRUD ---
+@app.route("/pilots")
+@login_required
+def list_pilots():
+    pilots = Pilot.query.all()
+    is_admin = current_user.is_admin
+    return render_template("pilot_list.html", pilots=pilots, is_admin=is_admin, current_user=current_user)
+
+@app.route("/pilot/<int:pilot_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_pilot(pilot_id):
+    pilot = Pilot.query.get_or_404(pilot_id)
+    is_admin = current_user.is_admin
+    if not is_admin and current_user.id != pilot_id:
+        abort(403)
+    if request.method == "POST":
+        if is_admin:
+            pilot.username = request.form["username"]
+            pilot.email = request.form["email"]
+            pilot.is_admin = "is_admin" in request.form
+        else:
+            pilot.username = request.form["username"]
+            pilot.email = request.form["email"]
+        db.session.commit()
+        flash("Pilot updated!", "success")
+        return redirect(url_for("list_pilots"))
+    return render_template("edit_pilot.html", pilot=pilot, is_admin=is_admin)
+
+# --- Company Financials (view for all, edit for admin) ---
+@app.route("/company_financials")
+@login_required
+def company_financials():
+    financial = CompanyFinancial.query.first()
+    is_admin = current_user.is_admin
+    return render_template("company_financials.html", financial=financial, is_admin=is_admin)
+
 @app.route("/admin/company_financials/edit", methods=["GET", "POST"])
 @login_required
-@admin_required
 def edit_company_financials():
+    is_admin = current_user.is_admin
+    if not is_admin:
+        abort(403)
     financial = CompanyFinancial.query.first()
     if not financial:
         financial = CompanyFinancial()
@@ -212,23 +269,8 @@ def edit_company_financials():
         financial.expenses = float(request.form["expenses"])
         db.session.commit()
         flash("Company financials updated.", "success")
-        return redirect(url_for("admin_dashboard"))
+        return redirect(url_for("company_financials"))
     return render_template("edit_company_financials.html", financial=financial)
-
-# --- Edit Pilot (username/email/is_admin) ---
-@app.route("/admin/pilot/<int:pilot_id>/edit", methods=["GET", "POST"])
-@login_required
-@admin_required
-def edit_pilot(pilot_id):
-    pilot = Pilot.query.get_or_404(pilot_id)
-    if request.method == "POST":
-        pilot.username = request.form["username"]
-        pilot.email = request.form["email"]
-        pilot.is_admin = "is_admin" in request.form
-        db.session.commit()
-        flash("Pilot updated!", "success")
-        return redirect(url_for("admin_dashboard"))
-    return render_template("edit_pilot.html", pilot=pilot)
 
 @app.errorhandler(404)
 def page_not_found(e):

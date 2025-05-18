@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Admin Dashboard</h1>
-
 <h2>Pilots</h2>
 <a href="{{ url_for('register') }}">Add Pilot (via registration)</a>
 <table border="1">
@@ -29,7 +28,6 @@
     </tr>
   {% endfor %}
 </table>
-
 <h2>Aircraft</h2>
 <a href="{{ url_for('add_aircraft') }}">Add Aircraft</a>
 <table border="1">
@@ -48,7 +46,6 @@
     </tr>
   {% endfor %}
 </table>
-
 <h2>Fleets</h2>
 <a href="{{ url_for('add_fleet') }}">Add Fleet</a>
 <table border="1">
@@ -65,7 +62,6 @@
     </tr>
   {% endfor %}
 </table>
-
 <h2>Company Financials</h2>
 <p>
   Balance: ${{ "%.2f"|format(financial.balance if financial else 0) }}<br>
