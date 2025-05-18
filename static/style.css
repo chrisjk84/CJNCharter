@@ -1,80 +1,229 @@
 body {
-  margin: 0;
-  font-family: 'Orbitron', sans-serif;
-  background-color: #1c1c1c;
-  color: #e0e0e0;
+    background: #222326;
+    color: #f4f5f7;
+    font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 40px;
-  background-color: #2f2f2f;
-  border-bottom: 4px solid #444;
+nav {
+    background: #18191b;
+    padding: 0 40px;
+    min-height: 88px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    border-bottom: 2px solid #323337;
 }
 
 .logo {
-  font-size: 1.8em;
-  font-weight: bold;
-  color: #ffffff;
+    display: flex;
+    align-items: center;
+    height: 88px;
+    margin-right: 2.5em;
 }
 
-.nav a {
-  color: #cccccc;
-  text-decoration: none;
-  margin-left: 30px;
-  font-weight: 600;
-  transition: color 0.3s;
+.site-logo {
+    height: 74px;
+    width: auto;
+    margin-right: 0;
+    vertical-align: middle;
+    border-radius: 10px;
+    background: #222326;
+    box-shadow: 0 6px 24px #111114;
+    padding: 6px;
 }
 
-.nav a:hover {
-  color: #ffffff;
+nav a {
+    color: #f4f5f7;
+    margin-right: 28px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.09em;
+    letter-spacing: 0.01em;
+    padding: 14px 10px 10px 10px;
+    border-radius: 6px 6px 0 0;
+    transition: background 0.16s, color 0.16s;
+    position: relative;
 }
 
-.hero {
-  text-align: center;
-  padding: 100px 20px;
-  background: linear-gradient(to right, #2f2f2f, #1c1c1c);
+nav a.active, nav a:hover {
+    background: #303136;
+    color: #fff;
 }
 
-.hero h1 {
-  font-size: 3em;
-  margin-bottom: 10px;
-  color: #ffffff;
+h1, h2 {
+    color: #fff;
+    font-weight: bold;
+    letter-spacing: 0.04em;
+    text-shadow: 0 2px 8px #111114;
+    margin-top: 36px;
 }
 
-.hero p {
-  font-size: 1.2em;
-  color: #cccccc;
+label {
+    display: block;
+    margin-top: 1.6em;
+    font-weight: 700;
+    color: #f4f5f7;
+    letter-spacing: 0.01em;
 }
 
-section {
-  padding: 60px 40px;
-  border-bottom: 1px solid #333;
+input[type="text"], input[type="email"], input[type="password"], input[type="number"], select {
+    width: 100%;
+    padding: 1em;
+    margin: 10px 0 22px 0;
+    border-radius: 9px;
+    border: 2.5px solid #393b3f;
+    background: #2e3034;
+    color: #fff;
+    font-size: 1.13em;
+    font-weight: 500;
+    box-shadow: 0 1px 10px #18191b inset;
+    transition: border 0.18s, box-shadow 0.18s;
 }
 
-h2 {
-  font-size: 2em;
-  color: #ffffff;
-  margin-bottom: 20px;
+input:focus, select:focus {
+    border: 2.5px solid #84898e;
+    outline: none;
+    box-shadow: 0 0 0 2px #38393c;
+}
+
+input[type="submit"], button, .login-btn {
+    width: auto;
+    min-width: 116px;
+    padding: 9px 22px;
+    margin: 16px 10px 0 0;
+    background: linear-gradient(90deg, #35363a 60%, #191a1c 100%);
+    color: #fff;
+    border: 2px solid #191a1c;
+    border-radius: 9px;
+    font-size: 1.07em;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 18px #191a1c;
+    letter-spacing: 0.01em;
+    transition: background 0.18s, box-shadow 0.18s, border 0.18s, color 0.18s;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+input[type="submit"]:hover, button:hover, .login-btn:hover {
+    background: #1c1d1f;
+    color: #f4f5f7;
+    border-color: #393b3f;
+}
+
+table {
+    background: #292a2d;
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 98%;
+    margin: 36px auto 36px auto;
+    font-size: 1.08em;
+    border-radius: 16px;
+    box-shadow: 0 8px 48px #18191b, 0 2px 0 #18191b inset;
+    overflow: hidden;
+    color: #f4f5f7;
+}
+
+table th, table td {
+    border: 1px solid #323337;
+    padding: 17px 20px;
+    text-align: left;
+}
+
+table th {
+    background: #232427;
+    color: #bdbdbd;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+table tr:nth-child(even) {
+    background: #232427;
+}
+
+table tr:nth-child(odd) {
+    background: #292a2d;
 }
 
 ul {
-  list-style: none;
-  padding: 0;
+    list-style: none;
+    padding: 0;
 }
-
 li {
-  margin: 10px 0;
-  font-size: 1.1em;
-  color: #dddddd;
+    margin-bottom: 10px;
+}
+hr {
+    margin: 36px 0;
+    border: none;
+    border-top: 2px solid #232427;
 }
 
-.footer {
-  text-align: center;
-  padding: 20px;
-  background-color: #2f2f2f;
-  color: #777;
-  font-size: 0.9em;
+.flash, .error, .success {
+    margin: 24px auto;
+    padding: 15px 22px;
+    background: #2e3034;
+    border-left: 5px solid #bcbcbc;
+    border-radius: 8px;
+    max-width: 550px;
+    font-size: 1.1em;
+    text-align: center;
+    color: #f4f5f7;
+    box-shadow: 0 4px 22px #18191b;
+}
+
+.error { color: #ff4c4c; border-left-color: #ff4c4c; background: #322727; }
+.success { color: #7fff7f; border-left-color: #7fff7f; background: #273227; }
+
+a, a:visited {
+    color: #f4f5f7;
+    text-decoration: underline;
+    transition: color 0.18s, background 0.18s;
+}
+a:hover, a:active {
+    color: #f4f5f7;
+    background: #232427;
+    text-decoration: underline;
+}
+
+.register-link {
+    display: block;
+    text-align: center;
+    margin-top: 2em;
+}
+
+footer {
+    background: #18191b;
+    color: #bcbcbc;
+    padding: 22px 0 12px 0;
+    text-align: center;
+    font-size: 1.04em;
+    margin-top: 60px;
+    box-shadow: 0 -1px 12px #18191b;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2.6em;
+    flex-wrap: wrap;
+}
+
+.footer-version {
+    color: #888;
+    font-size: 0.97em;
+    margin-left: 14px;
+}
+
+/* Aviation themed accent (e.g. for icons or table headers if desired) */
+.aviation-accent {
+    color: #bdbdbd;
+    letter-spacing: 0.12em;
+    font-weight: 900;
+    text-transform: uppercase;
+    font-size: 1.07em;
+    text-shadow: 0 2px 6px #18191b;
 }
