@@ -7,3 +7,4 @@ geopy
 openai>=1.0.0
 requests
 avwx-engine
+flask_sqlalchemy
