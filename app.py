@@ -171,11 +171,52 @@ def fetch_avwx_taf(icao):
 def add_icao_field(airport):
     airport["icao"] = airport.get("icao_code") or airport.get("gps_code") or airport.get("iata_code") or ""
 
-def generate_openai_scenario(dep, dest, distance_nm, dep_metar, dest_metar, dest_taf, pax):
+# --- Passenger & Cargo Variability ---
+PASSENGER_TYPES = [
+    {"type": "VIP", "special": "Champagne on board, privacy required"},
+    {"type": "Business", "special": "WiFi requested"},
+    {"type": "Medical", "special": "Urgent transfer, stretcher required"},
+    {"type": "Tourists", "special": "Extra baggage, sightseeing"},
+    {"type": "Family", "special": "Child seat needed"},
+    {"type": "Sports Team", "special": "Oversized equipment"},
+    {"type": "Government", "special": "Secure transport"}
+]
+
+CARGO_TYPES = [
+    {"type": "Standard Baggage", "note": ""},
+    {"type": "Hazardous Material", "note": "Special handling required"},
+    {"type": "Medical Supplies", "note": "Temperature control needed"},
+    {"type": "Live Animal", "note": "Ventilation required"},
+    {"type": "Perishable Goods", "note": "Deliver within 4 hours"},
+    {"type": "Sensitive Equipment", "note": "Fragile, careful loading"}
+]
+
+def generate_passenger_manifest(max_pax):
+    num_passengers = random.randint(1, max_pax)
+    manifest = []
+    for _ in range(num_passengers):
+        p = random.choice(PASSENGER_TYPES)
+        manifest.append(p)
+    return manifest
+
+def generate_cargo_manifest():
+    num_items = random.randint(1, 3)
+    manifest = []
+    for _ in range(num_items):
+        c = random.choice(CARGO_TYPES)
+        manifest.append(c)
+    return manifest
+# --- END Passenger & Cargo Variability ---
+
+def generate_openai_scenario(dep, dest, distance_nm, dep_metar, dest_metar, dest_taf, pax, passengers, cargo):
+    passenger_summary = "; ".join(f"{p['type']}: {p['special']}" for p in passengers)
+    cargo_summary = "; ".join(f"{c['type']}{' - ' + c['note'] if c['note'] else ''}" for c in cargo)
+
     prompt = (
         f"Write a realistic scenario for a charter flight based on the depature airport. This could be leasure, business, medical, or something random. Write the scenario in present tense. "
         f"from {dep['name']} ({dep['icao']}) to {dest['name']} ({dest['icao']}). The distance is {int(distance_nm)} nautical miles. "
-        f"Departure airport METAR: {dep_metar}. Destination airport METAR: {dest_metar}. Destination TAF: {dest_taf}. You have {pax} passengers. "
+        f"Departure airport METAR: {dep_metar}. Destination airport METAR: {dest_metar}. Destination TAF: {dest_taf}. "
+        f"You have {pax} passengers. Passenger manifest: {passenger_summary}. Cargo manifest: {cargo_summary}. "
         "Focus on the reason for the trip and the passenger background. "
         "Only mention weather at departure or destination if it is notable or will directly affect the flight. "
         "Do NOT invent in-flight emergencies, do NOT discuss enroute weather unless the real METAR/TAF suggests it. "
@@ -200,6 +241,8 @@ def index():
     airport_info = None
     results = []
     aircraft_list = load_aircraft()
+    passenger_manifest = []
+    cargo_manifest = []
     user_input = {
         "departure_icao": "",
         "min_distance": "50",
@@ -269,7 +312,15 @@ def index():
                     dest_taf = fetch_avwx_taf(dest_full["icao"])
                     weather_brief_dep = dep_metar
                     weather_brief_dest = f"METAR: {dest_metar}\nTAF: {dest_taf}"
-                    scenario = generate_openai_scenario(dep_airport, dest_full, distance, dep_metar, dest_metar, dest_taf, max_pax)
+
+                    # Generate random passenger and cargo manifest
+                    passenger_manifest = generate_passenger_manifest(max_pax)
+                    cargo_manifest = generate_cargo_manifest()
+
+                    scenario = generate_openai_scenario(
+                        dep_airport, dest_full, distance, dep_metar, dest_metar, dest_taf, len(passenger_manifest),
+                        passenger_manifest, cargo_manifest
+                    )
                     random_scenario = scenario
                     airport_info = {
                         "icao": dest_full["icao"],
@@ -299,7 +350,9 @@ def index():
         weather_brief_dep=weather_brief_dep,
         weather_brief_dest=weather_brief_dest,
         airport_info=airport_info,
-        aircraft_list=aircraft_list
+        aircraft_list=aircraft_list,
+        passenger_manifest=passenger_manifest,
+        cargo_manifest=cargo_manifest
     )
 
 @app.route('/changelog')
