@@ -42,7 +42,6 @@ def register():
                 username=username,
                 email=email,
                 password_hash=generate_password_hash(password),
-                balance=0.0  # <-- Ensure this exists in your model!
             )
             db.session.add(new_pilot)
             db.session.commit()
