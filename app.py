@@ -2,9 +2,9 @@ import os
 import csv
 import math
 import random
-import requests
+import requests # type: ignore
 import openai
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request # type: ignore
 
 app = Flask(__name__)
 
@@ -37,7 +37,7 @@ def load_aircraft():
                         'name': name,
                         'icao_code': row['ICAO Code'],
                         'max_passengers': int(row['Max Passengers']),
-                        'min_landing_distance': int(row['Min Landing Distance (ft)']),
+                        'min_landing_distance': int(row['Min Takeoff Distance (ft)']),
                         'max_range': int(row['Max Range (nm)'])
                     })
         except Exception as e:

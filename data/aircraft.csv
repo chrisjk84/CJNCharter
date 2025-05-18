@@ -1,4 +1,4 @@
-ICAO Code,Make,Model,Max Passengers,Min Landing Distance (ft),Max Range (nm)
+ICAO Code,Make,Model,Max Passengers,Min Takeoff Distance (ft),Max Range (nm)
 CL60,Bombardier,Challenger 600,19,2400,3800
 C25B,Cessna,Citation CJ3,9,2770,2040
 C25C,Cessna,Citation CJ4,10,2940,2165
