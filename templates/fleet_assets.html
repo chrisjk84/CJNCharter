@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Fleet Assets - {{ fleet.name }}{% endblock %}
+{% block content %}
+<h1>Fleet Assets: {{ fleet.name }}</h1>
+<h2>Home Base</h2>
+<p>
+    {% if fleet.home_base %}
+        {{ fleet.home_base.name }} ({{ fleet.home_base.icao }})
+    {% else %}
+        Not set
+    {% endif %}
+</p>
+<h2>Hangars</h2>
+<ul>
+    {% for hangar in fleet.hangars %}
+        <li>{{ hangar.name }} at {{ hangar.airport.icao }}</li>
+    {% endfor %}
+</ul>
+<h2>Offices</h2>
+<ul>
+    {% for office in fleet.offices %}
+        <li>{{ office.name }} at {{ office.airport.icao }}</li>
+    {% endfor %}
+</ul>
+{% endblock %}

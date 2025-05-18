@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Company Flight Log - CJX Aviation{% endblock %}
+{% block content %}
+<h1>Company Flight Log</h1>
+<table>
+    <tr>
+        <th>Date</th><th>Aircraft</th><th>Fleet</th><th>From</th><th>To</th><th>Revenue</th><th>Lease Fee</th>
+    </tr>
+    {% for flight in flights %}
+        <tr>
+            <td>{{ flight.date.strftime('%Y-%m-%d') }}</td>
+            <td>{{ flight.aircraft.registration }} ({{ flight.aircraft.make }} {{ flight.aircraft.model }})</td>
+            <td>{{ flight.fleet.name }}</td>
+            <td>{{ flight.from_airport.icao if flight.from_airport else '' }}</td>
+            <td>{{ flight.to_airport.icao if flight.to_airport else '' }}</td>
+            <td>${{ "%.2f"|format(flight.revenue) }}</td>
+            <td>${{ "%.2f"|format(flight.revenue * flight.lease_percent) }}</td>
+        </tr>
+    {% endfor %}
+</table>
+{% endblock %}

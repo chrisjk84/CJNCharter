@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Fleet Financials - {{ fleet.name }}{% endblock %}
+{% block content %}
+<h1>Fleet Financials: {{ fleet.name }}</h1>
+<p>Balance: ${{ "%.2f"|format(fleet.balance) }}</p>
+<table>
+    <tr><th>Date</th><th>Description</th><th>Amount</th></tr>
+    {% for fee in fleet.fees %}
+        <tr>
+            <td>{{ fee.date.strftime('%Y-%m-%d') }}</td>
+            <td>{{ fee.type }} - {{ fee.description }}</td>
+            <td>${{ "%.2f"|format(fee.amount) }}</td>
+        </tr>
+    {% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Fleet - {{ fleet.name }}{% endblock %}
+{% block content %}
+<h1>Fleet: {{ fleet.name }}</h1>
+<p>Manager: {{ fleet.manager.username }}</p>
+<p>Home Base: {{ fleet.home_base.icao if fleet.home_base else 'Unassigned' }}</p>
+<p>Balance: ${{ "%.2f"|format(fleet.balance) }}</p>
+<h2>Aircraft</h2>
+<ul>
+    {% for ac in fleet.aircraft %}
+        <li>
+            {{ ac.registration }} ({{ ac.make }} {{ ac.model }}) -
+            Stored at: {{ ac.hangar.airport.icao if ac.hangar else 'N/A' }}
+            {% if ac.hangar and (ac.hangar.company_owned or (ac.hangar.fleet_id == fleet.id)) %}
+                <span class="success">[Discounted Fees]</span>
+            {% endif %}
+        </li>
+    {% endfor %}
+</ul>
+<p>
+    <a href="{{ url_for('fleet_flightlog', fleet_id=fleet.id) }}">View Flight Log</a> |
+    <a href="{{ url_for('fleet_financials', fleet_id=fleet.id) }}">View Financials</a> |
+    <a href="{{ url_for('fleet_assets', fleet_id=fleet.id) }}">Manage Assets</a>
+</p>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Fleet Flight Log - {{ fleet.name }}{% endblock %}
+{% block content %}
+<h1>Fleet Flight Log: {{ fleet.name }}</h1>
+<table>
+    <tr>
+        <th>Date</th><th>Aircraft</th><th>From</th><th>To</th><th>Pilot(s)</th><th>Revenue</th>
+    </tr>
+    {% for flight in fleet.flights %}
+        <tr>
+            <td>{{ flight.date.strftime('%Y-%m-%d') }}</td>
+            <td>{{ flight.aircraft.registration }}</td>
+            <td>{{ flight.from_airport.icao if flight.from_airport else '' }}</td>
+            <td>{{ flight.to_airport.icao if flight.to_airport else '' }}</td>
+            <td>
+                {% for log in flight.pilotlogs %}
+                    {{ log.pilot.username }} ({{ log.role }}){% if not loop.last %}, {% endif %}
+                {% endfor %}
+            </td>
+            <td>${{ "%.2f"|format(flight.revenue) }}</td>
+        </tr>
+    {% endfor %}
+</table>
+{% endblock %}

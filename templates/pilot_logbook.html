@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Pilot Logbook - {{ pilot.username }}{% endblock %}
+{% block content %}
+<h1>Logbook: {{ pilot.username }}</h1>
+<table>
+    <tr>
+        <th>Date</th><th>Aircraft</th><th>From</th><th>To</th><th>Role</th><th>Fleet</th>
+    </tr>
+    {% for log in pilot.logbook %}
+        <tr>
+            <td>{{ log.flight.date.strftime('%Y-%m-%d') }}</td>
+            <td>{{ log.flight.aircraft.registration }}</td>
+            <td>{{ log.flight.from_airport.icao if log.flight.from_airport else '' }}</td>
+            <td>{{ log.flight.to_airport.icao if log.flight.to_airport else '' }}</td>
+            <td>{{ log.role }}</td>
+            <td>{{ log.flight.fleet.name if log.flight.fleet else '' }}</td>
+        </tr>
+    {% endfor %}
+</table>
+{% endblock %}

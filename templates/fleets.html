@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Fleets - CJX Aviation{% endblock %}
+{% block content %}
+<h1>Fleets</h1>
+<table>
+    <tr>
+        <th>Name</th><th>Manager</th><th>Home Base</th><th>Balance</th><th>Flight Log</th><th>Financials</th><th>Assets</th>
+    </tr>
+    {% for fleet in fleets %}
+        <tr>
+            <td><a href="{{ url_for('fleet_detail', fleet_id=fleet.id) }}">{{ fleet.name }}</a></td>
+            <td>{{ fleet.manager.username }}</td>
+            <td>{{ fleet.home_base.icao if fleet.home_base else '' }}</td>
+            <td>${{ "%.2f"|format(fleet.balance) }}</td>
+            <td><a href="{{ url_for('fleet_flightlog', fleet_id=fleet.id) }}">Flight Log</a></td>
+            <td><a href="{{ url_for('fleet_financials', fleet_id=fleet.id) }}">Financials</a></td>
+            <td><a href="{{ url_for('fleet_assets', fleet_id=fleet.id) }}">Assets</a></td>
+        </tr>
+    {% endfor %}
+</table>
+{% endblock %}

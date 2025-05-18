@@ -1,90 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Pilot Dashboard - CJX Aviation Network</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        body { background: #23272a; color: #e0e0e0; font-family: 'Segoe UI', Arial, sans-serif; }
-        .dashboard-container {
-            max-width: 700px;
-            margin: 4vw auto;
-            background: #141414;
-            border-radius: 10px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.32);
-            padding: 2.5rem 2.5rem;
-        }
-        h1 { text-align: center; color: #fff; }
-        .balance {
-            text-align: center;
-            margin: 1.5em 0;
-            font-size: 1.3em;
-            color: #7fff7f;
-            font-weight: bold;
-        }
-        .info-label { color: #bbb; font-weight: bold; }
-        .info-row { margin: 0.8em 0; }
-        .hangar-title { margin-top: 2.5em; font-size: 1.15em; color: #fff; text-align: center; }
-        .aircraft-list { margin-top: 1em; }
-        .aircraft-card {
-            background: #23272a;
-            border: 1px solid #6c757d;
-            border-radius: 8px;
-            padding: 1em 1.5em;
-            margin-bottom: 1.1em;
-        }
-        .logout-link {
-            display: block;
-            text-align: center;
-            margin-top: 2em;
-            color: #e0e0e0;
-            font-weight: bold;
-            text-decoration: underline;
-        }
-        .logout-link:hover, .logout-link:active {
-            color: #7fff7f;
-            text-decoration: underline;
-        }
-        a, a:visited {
-            color: #e0e0e0;
-            text-decoration: underline;
-        }
-        a:hover, a:active {
-            color: #7fff7f;
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
-    <div class="dashboard-container">
-        <h1>Welcome, {{ pilot.username }}!</h1>
-        <div class="balance">
-            Balance: ${{ "%.2f"|format(pilot.balance) }}
-        </div>
-        <div class="info-row">
-            <span class="info-label">Email:</span> {{ pilot.email }}
-        </div>
-        <div class="info-row">
-            <span class="info-label">Date Joined:</span> {{ pilot.date_joined.strftime('%Y-%m-%d') if pilot.date_joined else 'N/A' }}
-        </div>
-        <div class="hangar-title">Your Hangar</div>
-        {% if pilot.hangar %}
-            <div class="aircraft-list">
-                {% for ac in pilot.hangar %}
-                    <div class="aircraft-card">
-                        <b>{{ ac.make }} {{ ac.model }}</b> ({{ ac.icao_code }})<br>
-                        Registration: {{ ac.registration }}<br>
-                        Purchased: {{ ac.purchased_date.strftime('%Y-%m-%d') if ac.purchased_date else 'N/A' }}<br>
-                        Location: {{ ac.location or 'Unknown' }}
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="aircraft-list">
-                <i>You don't own any aircraft yet.</i>
-            </div>
-        {% endif %}
-        <a href="{{ url_for('logout') }}" class="logout-link">Logout</a>
-    </div>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Dashboard - CJX Aviation{% endblock %}
+{% block content %}
+<h1>Welcome, {{ pilot.username }}!</h1>
+<p>Your fleet(s):</p>
+<ul>
+    {% for fleet in pilot.fleets %}
+        <li>
+            <a href="{{ url_for('fleet_detail', fleet_id=fleet.id) }}">{{ fleet.name }}</a>
+            (Balance: ${{ "%.2f"|format(fleet.balance) }})
+        </li>
+    {% endfor %}
+</ul>
+<p>
+    <a href="{{ url_for('pilot_logbook', pilot_id=pilot.id) }}">Your Logbook</a>
+</p>
+{% endblock %}
