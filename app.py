@@ -20,10 +20,6 @@ login_manager.login_view = "login"
 def load_user(user_id):
     return Pilot.query.get(int(user_id))
 
-@app.before_first_request
-def create_tables():
-    db.create_all()
-
 @app.route('/')
 @login_required
 def dashboard():
@@ -72,3 +68,9 @@ def logout():
     logout_user()
     flash("You have been logged out.", "success")
     return redirect(url_for("login"))
+
+# Only run db.create_all() for local development
+if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)
