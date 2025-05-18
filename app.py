@@ -70,7 +70,7 @@ def logout():
     flash("You have been logged out.", "success")
     return redirect(url_for("login"))
 
-# --- NEW PAGE: Company Financials ---
+# --- Company Financials Page ---
 @app.route("/company_financials")
 @login_required
 def company_financials():
@@ -78,12 +78,53 @@ def company_financials():
     # For now, just render the template
     return render_template("company_financials.html")
 
-# --- NEW PAGE: Company Flight Log ---
+# --- Company Flight Log Page ---
 @app.route("/company_flightlog")
 @login_required
 def company_flightlog():
     # Example: get flight log data here if available
     return render_template("company_flightlog.html")
+
+# --- Fleets Overview ---
+@app.route("/fleets")
+@login_required
+def fleets():
+    return render_template("fleets.html")
+
+# --- Fleet Assets ---
+@app.route("/fleet_assets")
+@login_required
+def fleet_assets():
+    return render_template("fleet_assets.html")
+
+# --- Fleet Details ---
+@app.route("/fleet_details")
+@login_required
+def fleet_details():
+    return render_template("fleet_details.html")
+
+# --- Fleet Flight Log ---
+@app.route("/fleet_flightlog")
+@login_required
+def fleet_flightlog():
+    return render_template("fleet_flightlog.html")
+
+# --- Pilots Overview ---
+@app.route("/pilots")
+@login_required
+def pilots():
+    return render_template("pilots.html")
+
+# --- Pilot Logbook ---
+@app.route("/pilot_logbook")
+@login_required
+def pilot_logbook():
+    return render_template("pilot_logbook.html")
+
+# --- Error Handler for 404 ---
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 # Only run db.create_all() for local development
 if __name__ == "__main__":
