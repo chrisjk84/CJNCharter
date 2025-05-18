@@ -2,14 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CJN Charter</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <nav>
         <span class="logo">
             <img src="{{ url_for('static', filename='CJX-Aviation-Network-logo.png') }}" alt="CJX Aviation Network Logo" class="site-logo">
-            CJN Charter
         </span>
         <a href="{{ url_for('dashboard') }}" {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>Dashboard</a>
         <a href="{{ url_for('list_pilots') }}" {% if request.endpoint == 'list_pilots' %}class="active"{% endif %}>Pilots</a>
