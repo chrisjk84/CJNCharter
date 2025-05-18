@@ -1,6 +1,7 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, Pilot, Aircraft
@@ -11,6 +12,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cjx_pilots.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
+migrate = Migrate(app, db)  # <-- Added line
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -40,7 +42,7 @@ def register():
                 username=username,
                 email=email,
                 password_hash=generate_password_hash(password),
-                balance=0.0
+                balance=0.0  # <-- Ensure this exists in your model!
             )
             db.session.add(new_pilot)
             db.session.commit()
@@ -69,7 +71,6 @@ def logout():
     flash("You have been logged out.", "success")
     return redirect(url_for("login"))
 
-# Only run db.create_all() for local development
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
