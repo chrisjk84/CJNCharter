@@ -1,75 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Register - CJX Aviation Network</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        body { background: #23272a; color: #e0e0e0; font-family: 'Segoe UI', Arial, sans-serif; }
-        .register-container {
-            max-width: 340px;
-            margin: 7vw auto;
-            background: #141414;
-            border-radius: 10px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.32);
-            padding: 2.5rem 1.2rem;
-        }
-        h1 { text-align: center; color: #fff; }
-        label { display: block; margin-top: 1.2em; }
-        input[type="text"], input[type="password"], input[type="email"] {
-            width: 90%;
-            max-width: 240px;
-            display: block;
-            margin: 0.2em auto 0 auto;
-            border-radius: 6px;
-            border: 1px solid #6c757d;
-            background: #23272a;
-            color: #e0e0e0;
-            font-size: 1.05em;
-            padding: 0.7em 1em;
-        }
-        .register-btn {
-            width: 100%; margin-top: 2em; padding: 0.9em;
-            background: #6c757d; color: #fff; border: none;
-            border-radius: 6px; font-size: 1.1em; font-weight: bold; cursor: pointer;
-            transition: background 0.2s;
-        }
-        .register-btn:hover { background: #4682b4; color: #fff; }
-        .login-link { display: block; text-align: center; margin-top: 1.5em; }
-        .error { color: #ff6b6b; text-align: center; margin-top: 1em; }
-        .success { color: #7fff7f; text-align: center; margin-top: 1em; }
-        a, a:visited {
-            color: #e0e0e0;
-            text-decoration: underline;
-        }
-        a:hover, a:active {
-            color: #7fff7f;
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
-    <div class="register-container">
-        <h1>Pilot Registration</h1>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        <form method="POST" action="{{ url_for('register') }}">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-            <button class="register-btn" type="submit">Register</button>
-        </form>
-        <div class="login-link">
-            Already have an account? <a href="{{ url_for('login') }}">Login here</a>
-        </div>
+{% extends "base.html" %}
+{% block content %}
+<div class="login-container">
+    <h1>Register</h1>
+    <form method="post">
+        <label for="username">Username</label>
+        <input type="text" name="username" id="username" required>
+        <label for="email">Email</label>
+        <input type="email" name="email" id="email" required>
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" required>
+        <input class="login-btn" type="submit" value="Register">
+    </form>
+    <div class="register-link">
+        <a href="{{ url_for('login') }}">Already have an account? Login</a>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

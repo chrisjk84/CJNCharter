@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Welcome, {{ pilot.username }}</h1>
-<p>Your email: {{ pilot.email }}</p>
-<p>Your fleet: {{ pilot.fleet.name if pilot.fleet else "Unassigned" }}</p>
-<p>Your role: {{ "Admin" if pilot.is_admin else "Pilot" }}</p>
+<div class="container">
+    <h1>Welcome, {{ pilot.username }}</h1>
+    <p><strong>Email:</strong> {{ pilot.email }}</p>
+    <p><strong>Fleet:</strong> {{ pilot.fleet.name if pilot.fleet else "Unassigned" }}</p>
+    <p><strong>Role:</strong> <span style="color:#0096c7;">{{ "Admin" if pilot.is_admin else "Pilot" }}</span></p>
+</div>
 {% endblock %}

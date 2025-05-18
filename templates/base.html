@@ -7,15 +7,19 @@
 </head>
 <body>
     <nav>
-        <a href="{{ url_for('dashboard') }}">Dashboard</a> |
-        <a href="{{ url_for('list_pilots') }}">Pilots</a> |
-        <a href="{{ url_for('list_aircraft') }}">Aircraft</a> |
-        <a href="{{ url_for('list_fleets') }}">Fleets</a> |
-        <a href="{{ url_for('company_financials') }}">Company Financials</a>
+        <span class="logo">
+            <img src="{{ url_for('static', filename='CJX-Aviation-Network-logo.png') }}" alt="CJX Aviation Network Logo" class="site-logo">
+            CJN Charter
+        </span>
+        <a href="{{ url_for('dashboard') }}" {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>Dashboard</a>
+        <a href="{{ url_for('list_pilots') }}" {% if request.endpoint == 'list_pilots' %}class="active"{% endif %}>Pilots</a>
+        <a href="{{ url_for('list_aircraft') }}" {% if request.endpoint == 'list_aircraft' %}class="active"{% endif %}>Aircraft</a>
+        <a href="{{ url_for('list_fleets') }}" {% if request.endpoint == 'list_fleets' %}class="active"{% endif %}>Fleets</a>
+        <a href="{{ url_for('company_financials') }}" {% if request.endpoint == 'company_financials' %}class="active"{% endif %}>Company Financials</a>
         {% if is_admin %}
-            | <a href="{{ url_for('admin_dashboard') }}">Admin</a>
+            <a href="{{ url_for('admin_dashboard') }}" {% if request.endpoint == 'admin_dashboard' %}class="active"{% endif %}>Admin</a>
         {% endif %}
-        | <a href="{{ url_for('logout') }}">Logout</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
     </nav>
     <hr>
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -28,5 +32,16 @@
       {% endif %}
     {% endwith %}
     {% block content %}{% endblock %}
+
+    <footer>
+        <div class="footer-content">
+            <span>
+                <strong>CJN Charter</strong> &copy; {{ 2025 }}. All rights reserved.
+            </span>
+            <span class="footer-version">
+                Version v0.3.0
+            </span>
+        </div>
+    </footer>
 </body>
 </html>

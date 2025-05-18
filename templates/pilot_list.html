@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="container">
 <h1>Pilot List</h1>
-<table border="1">
+<table>
   <tr>
     <th>ID</th><th>Username</th><th>Email</th><th>Admin?</th><th>Fleet</th><th>Grounded?</th>
     <th>Actions</th>
@@ -22,4 +23,5 @@
     </tr>
   {% endfor %}
 </table>
+</div>
 {% endblock %}

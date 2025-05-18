@@ -1,8 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="container">
 <h1>Edit Fleet</h1>
 <form method="post">
-    <label>Name: <input type="text" name="name" value="{{ fleet.name }}" required></label><br>
+    <label>Name
+        <input type="text" name="name" value="{{ fleet.name }}" required>
+    </label>
     <input type="submit" value="Save">
 </form>
+</div>
 {% endblock %}

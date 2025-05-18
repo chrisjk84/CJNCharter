@@ -1,16 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="container">
 <h1>Edit Pilot: {{ pilot.username }}</h1>
 <form method="post">
-    <label>Username: <input type="text" name="username" value="{{ pilot.username }}" required></label><br>
-    <label>Email: <input type="email" name="email" value="{{ pilot.email }}" required></label><br>
+    <label>Username
+        <input type="text" name="username" value="{{ pilot.username }}" required>
+    </label>
+    <label>Email
+        <input type="email" name="email" value="{{ pilot.email }}" required>
+    </label>
     {% if is_admin %}
         <label>
             <input type="checkbox" name="is_admin" {% if pilot.is_admin %}checked{% endif %}>
             Admin
-        </label><br>
+        </label>
     {% endif %}
     <input type="submit" value="Save">
 </form>
-<a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+</div>
 {% endblock %}

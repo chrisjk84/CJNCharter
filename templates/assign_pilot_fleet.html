@@ -1,15 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="container">
 <h1>Assign {{ pilot.username }} to Fleet</h1>
 <form method="post">
-    <label>Fleet:
+    <label>Fleet
         <select name="fleet_id">
             <option value="">Unassigned</option>
             {% for fleet in fleets %}
                 <option value="{{ fleet.id }}" {% if pilot.fleet_id == fleet.id %}selected{% endif %}>{{ fleet.name }}</option>
             {% endfor %}
         </select>
-    </label><br>
+    </label>
     <input type="submit" value="Assign">
 </form>
+</div>
 {% endblock %}

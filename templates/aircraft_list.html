@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="container">
 <h1>Aircraft List</h1>
 {% if is_admin %}
-  <a href="{{ url_for('add_aircraft') }}">Add Aircraft</a>
+  <a href="{{ url_for('add_aircraft') }}"><button>Add Aircraft</button></a>
 {% endif %}
-<table border="1">
+<table>
   <tr>
     <th>ID</th><th>Registration</th><th>Type</th><th>Fleet</th>
     {% if is_admin %}<th>Actions</th>{% endif %}
@@ -21,4 +22,5 @@
     </tr>
   {% endfor %}
 </table>
+</div>
 {% endblock %}

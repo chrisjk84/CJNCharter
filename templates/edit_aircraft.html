@@ -1,17 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="container">
 <h1>Edit Aircraft</h1>
 <form method="post">
-    <label>Registration: <input type="text" name="registration" value="{{ aircraft.registration }}" required></label><br>
-    <label>Type: <input type="text" name="type" value="{{ aircraft.type }}" required></label><br>
-    <label>Fleet:
+    <label>Registration
+        <input type="text" name="registration" value="{{ aircraft.registration }}" required>
+    </label>
+    <label>Type
+        <input type="text" name="type" value="{{ aircraft.type }}" required>
+    </label>
+    <label>Fleet
         <select name="fleet_id">
             <option value="">Unassigned</option>
             {% for fleet in fleets %}
                 <option value="{{ fleet.id }}" {% if aircraft.fleet_id == fleet.id %}selected{% endif %}>{{ fleet.name }}</option>
             {% endfor %}
         </select>
-    </label><br>
+    </label>
     <input type="submit" value="Save">
 </form>
+</div>
 {% endblock %}
