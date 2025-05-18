@@ -1,0 +1,9 @@
+flask
+fpdf
+reportlab
+python-dotenv
+gunicorn
+geopy
+openai>=1.0.0
+requests
+avwx-engine
